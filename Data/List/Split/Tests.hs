@@ -1,5 +1,9 @@
 module Data.List.Split.Tests where
 
+import Data.List.Split.Internals
+
+prop_default_id l = split defaultSplitter l == [l]
+
 -- | split at regular intervals
 chunk :: Int -> [a] -> [[a]]
 chunk _ [] = [[]]
