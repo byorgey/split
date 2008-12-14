@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, Rank2Types #-}
+{-# LANGUAGE GADTs, Rank2Types, PatternGuards #-}
 module Data.List.Split.Internals where
 
 data Splitter a = Splitter { delimiter        :: Delimiter a
