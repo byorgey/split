@@ -1,0 +1,24 @@
+Name:                split
+Version:             0.1
+Stability:           experimental
+Description:         Combinator library and utility functions for splitting lists.
+Homepage:            http://code.haskell.org/~byorgey/code/split
+Synopsis:            Combinator library for splitting lists.
+License:             BSD3
+License-file:        LICENSE
+Extra-source-files:  README
+Author:              Brent Yorgey
+Maintainer:          byorgey@cis.upenn.edu
+Category:            List
+Build-type:          Simple
+
+flag testing
+  description: Testing mode
+  default: False
+
+library
+  ghc-options:         -Wall
+  if flag(testing)
+    ghc-options: -Werror
+  Build-Depends:     base
+  Exposed-Modules:   Data.List.Split
