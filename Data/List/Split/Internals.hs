@@ -110,6 +110,7 @@ dropInitial DropBlank (Chunk [] : l) = l
 dropInitial _ l = l
 
 dropFinal :: EndPolicy -> SplitList a -> SplitList a
+dropFinal _ [] = []
 dropFinal DropBlank l | Chunk [] <- last l = init l
 dropFinal _ l = l
 
