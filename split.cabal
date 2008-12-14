@@ -11,6 +11,7 @@ Author:              Brent Yorgey
 Maintainer:          byorgey@cis.upenn.edu
 Category:            List
 Build-type:          Simple
+Cabal-Version:       >= 1.2
 
 flag testing
   description: Testing mode

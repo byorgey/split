@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, Rank2Types, PatternGuards, ViewPatterns #-}
+{-# LANGUAGE GADTs, Rank2Types, PatternGuards #-}
 module Data.List.Split (
                          Splitter
                        , split
