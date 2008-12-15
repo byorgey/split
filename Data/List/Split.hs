@@ -4,7 +4,7 @@ module Data.List.Split (
                        , oneOf
                        , onSublist
                        , whenElt
-                       , keepDelims
+                       , dropDelims
                        , keepDelimsL
                        , keepDelimsR
                        , condense

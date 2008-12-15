@@ -20,25 +20,23 @@ data Splitter a = Splitter { delimiter        :: Delimiter a
                                -- ^ Drop a final blank chunk?
                            }
 
--- | The default splitting strategy: drop delimiters from the output,
---   don't condense multiple consecutive delimiters into one, keep
---   initial and final blank chunks.  Default delimiter is the
---   constantly false predicate.
+-- | The default splitting strategy: keep delimiters in the output
+--   as separate chunks, don't condense multiple consecutive
+--   delimiters into one, keep initial and final blank chunks.
+--   Default delimiter is the constantly false predicate.
 --
---   XXX this isn't true! change default to keep instead of drop delimiters?
+--   The 'defaultSplitter' strategy with any delimiter gives a
+--   maximally information-preserving splitting strategy, in the sense
+--   that (a) taking the 'concat' of the output yields the original
+--   list, and (b) given only the output list, we can reconstruct a
+--   'Splitter' which would produce the same output list again given
+--   the original input list.
 --
---   Overriding the delimiter of the 'defaultSplitter' strategy gives
---   a maximally information-preserving splitting strategy, in the
---   sense that (a) taking the 'concat' of the output yields the
---   original list, and (b) given only the output list, we can
---   reconstruct a 'Splitter' which would produce the same output list
---   again given the original input list.
---
---   This default strategy can be overridden in various ways to allow
---   discarding various sorts of information.
+--   This default strategy can be overridden to allow discarding
+--   various sorts of information.
 defaultSplitter :: Splitter a
 defaultSplitter = Splitter { delimiter        = DelimEltPred (const False)
-                           , delimPolicy      = Drop
+                           , delimPolicy      = Keep
                            , condensePolicy   = KeepBlankFields
                            , initBlankPolicy  = KeepBlank
                            , finalBlankPolicy = KeepBlank
@@ -125,21 +123,21 @@ postProcess :: Splitter a -> SplitList a -> [[a]]
 postProcess s = map fromElem
               . dropFinal (finalBlankPolicy s)
               . dropInitial (initBlankPolicy s)
-              . mergeDelims (delimPolicy s)
-              . dropDelims (delimPolicy s)
+              . doMerge (delimPolicy s)
+              . doDrop (delimPolicy s)
               . insertBlanks
-              . condenseDelims (condensePolicy s)
+              . doCondense (condensePolicy s)
 
 -- | Drop delimiters if the 'DelimPolicy' is 'Drop'.
-dropDelims :: DelimPolicy -> SplitList a -> SplitList a
-dropDelims Drop l = [ c | c@(Chunk _) <- l ]
-dropDelims _ l = l
+doDrop :: DelimPolicy -> SplitList a -> SplitList a
+doDrop Drop l = [ c | c@(Chunk _) <- l ]
+doDrop _ l = l
 
 -- | Condense multiple consecutive delimiters into one if the
 --   'CondensePolicy' is 'Condense'.
-condenseDelims :: CondensePolicy -> SplitList a -> SplitList a
-condenseDelims KeepBlankFields l = l
-condenseDelims Condense l = condense' l
+doCondense :: CondensePolicy -> SplitList a -> SplitList a
+doCondense KeepBlankFields l = l
+doCondense Condense l = condense' l
   where condense' [] = []
         condense' (c@(Chunk _) : l) = c : condense' l
         condense' l = (Delim $ concatMap fromElem ds) : condense' rest
@@ -161,10 +159,10 @@ insertBlanks' [d@(Delim _)] = [d, Chunk []]
 insertBlanks' (c : l) = c : insertBlanks' l
 
 -- | Merge delimiters into adjacent chunks according to the 'DelimPolicy'.
-mergeDelims :: DelimPolicy -> SplitList a -> SplitList a
-mergeDelims KeepLeft = mergeLeft
-mergeDelims KeepRight = mergeRight
-mergeDelims _ = id
+doMerge :: DelimPolicy -> SplitList a -> SplitList a
+doMerge KeepLeft = mergeLeft
+doMerge KeepRight = mergeRight
+doMerge _ = id
 
 -- | Merge delimiters with adjacent chunks to the right (yes, that's
 --   not a typo: the delimiters should end up on the left of the
@@ -205,33 +203,33 @@ split s = postProcess s . splitInternal (delimiter s)
 -- | A splitting strategy that splits on any one of the given
 --   elements.  For example:
 --
--- > split (oneOf "xyz") "aazbxyzcxd" == ["aa","b","","","c","d"]
+-- > split (oneOf "xyz") "aazbxyzcxd" == ["aa","z","b","x","","y","","z","c","x","d"]
 oneOf :: Eq a => [a] -> Splitter a
 oneOf elts = defaultSplitter { delimiter = DelimEltPred (`elem` elts) }
 
 -- | A splitting strategy that splits on the given list, when it is
 --   encountered as an exact subsequence.  For example:
 --
--- > split (onSublist "xyz") "aazbxyzcxd" == ["aazb","cxd"]
+-- > split (onSublist "xyz") "aazbxyzcxd" == ["aazb","xyz","cxd"]
 onSublist :: Eq a => [a] -> Splitter a
 onSublist lst = defaultSplitter { delimiter = DelimSublist lst }
 
 -- | A splitting strategy that splits on any elements that satisfy the
 --   given predicate.  For example:
 --
--- > split (whenElt (<0)) [2,4,-3,6,-9,1] == [[2,4],[6],[1]]
+-- > split (whenElt (<0)) [2,4,-3,6,-9,1] == [[2,4],[-3],[6],[-9],[1]]
 whenElt :: (a -> Bool) -> Splitter a
 whenElt p = defaultSplitter { delimiter = DelimEltPred p }
 
 -- ** Strategy transformers
 
--- | Keep delimiters as their own separate lists in the output (the
---   default is to drop delimiters). For example,
+-- | Drop delimiters from the output (the default is to keep
+--   them). For example,
 --
--- > split (oneOf ":") "a:b:c" == ["a", "b", "c"]
--- > split (keepDelims $ oneOf ":") "a:b:c" == ["a", ":", "b", ":", "c"]
-keepDelims :: Splitter a -> Splitter a
-keepDelims s = s { delimPolicy = Keep }
+-- > split (oneOf ":") "a:b:c" == ["a", ":", "b", ":", "c"]
+-- > split (dropDelims $ oneOf ":") "a:b:c" == ["a", "b", "c"]
+dropDelims :: Splitter a -> Splitter a
+dropDelims s = s { delimPolicy = Drop }
 
 -- | Keep delimiters in the output by prepending them to adjacent
 --   chunks.  For example:
@@ -249,24 +247,25 @@ keepDelimsR s = s { delimPolicy = KeepRight }
 
 -- | Condense multiple consecutive delimiters into one.  For example:
 --
--- > split (condense $ oneOf "xyz") "aazbxyzcxd" == ["aa","b","c","d"]
--- > split (condense . keepDelims $ oneOf "xyz") "aazbxyzcxd" == ["aa","z","b","xyz","c","x","d"]
+-- > split (condense $ oneOf "xyz") "aazbxyzcxd" == ["aa","z","b","xyz","c","x","d"]
+-- > split (dropDelims $ oneOf "xyz") "aazbxyzcxd" == ["aa","b","","","c","d"]
+-- > split (condense . dropDelims $ oneOf "xyz") "aazbxyzcxd" == ["aa","b","c","d"]
 condense :: Splitter a -> Splitter a
 condense s = s { condensePolicy = Condense }
 
 -- | Don't generate a blank chunk if there is a delimiter at the
 --   beginning.  For example:
 --
--- > split (oneOf ":") ":a:b" == ["","a","b"]
--- > split (dropInitBlank $ oneOf ":") ":a:b" == ["a","b"]
+-- > split (oneOf ":") ":a:b" == ["",":","a",":","b"]
+-- > split (dropInitBlank $ oneOf ":") ":a:b" == [":","a",":","b"]
 dropInitBlank :: Splitter a -> Splitter a
 dropInitBlank s = s { initBlankPolicy = DropBlank }
 
 -- | Don't generate a blank chunk if there is a delimiter at the end.
 --   For example:
 --
--- > split (oneOf ":") "a:b:" == ["a","b",""]
--- > split (dropFinalBlank $ oneOf ":") "a:b:" == ["a","b"]
+-- > split (oneOf ":") "a:b:" == ["a",":","b",":",""]
+-- > split (dropFinalBlank $ oneOf ":") "a:b:" == ["a",":","b",":"]
 dropFinalBlank :: Splitter a -> Splitter a
 dropFinalBlank s = s { finalBlankPolicy = DropBlank }
 
@@ -275,7 +274,8 @@ dropFinalBlank s = s { finalBlankPolicy = DropBlank }
 -- | Drop all blank chunks from the output.  Equivalent to
 --   @dropInitBlank . dropFinalBlank . condense@.  For example:
 --
--- > XXX example here
+-- > split (oneOf ":") "::b:::a" == ["",":","",":","b",":","",":","",":","a"]
+-- > split (dropBlanks $ oneOf ":") "::b:::a" == ["::","b",":::","a"]
 dropBlanks :: Splitter a -> Splitter a
 dropBlanks = dropInitBlank . dropFinalBlank . condense
 
@@ -353,16 +353,33 @@ unintercalate = endBy
 
 -- * Other splitting methods
 
+-- | @splitEvery n@ splits a list into length-n pieces.  The last
+--   piece will be shorter if @n@ does not evenly divide the length of
+--   the list.
 splitEvery :: Int -> [e] -> [[e]]
 splitEvery i l = map (take i) (build (splitter l)) where
   splitter [] _ n = n
   splitter l c n  = l `c` splitter (drop i l) c n
 
+-- | A common synonym for @splitEvery@.
+chunk :: Int -> [e] -> [[e]]
+chunk = splitEvery
+
+-- | Split a list into chunks of the given lengths. For example:
+--
+-- > splitPlaces [2,3,4] [1..20] == [[1,2],[3,4,5],[6,7,8,9]]
+-- > splitPlaces [4,9] [1..10] == [[1,2,3,4],[5,6,7,8,9,10]]
+--
+--   The behavior of @splitPlaces ls xs@ when @sum ls /= length xs@ can
+--   be inferred from the above examples and the fact that @splitPlaces@
+--   is total.
 splitPlaces :: [Int] -> [e] -> [[e]]
 splitPlaces ls xs = build (splitPlacer ls xs) where
   splitPlacer [] _ _ n      = n
   splitPlacer _ [] _ n      = n
-  splitPlacer (l:ls) xs c n = let (x1, x2) = splitAt l xs in x1 `c` splitPlacer ls x2 c n
+  splitPlacer (l:ls) xs c n = let (x1, x2) = splitAt l xs
+                              in  x1 `c` splitPlacer ls x2 c n
 
+-- | Split a list into chunks sized by increasing powers of two.
 splitPowersOf2 :: [e] -> [[e]]
 splitPowersOf2 = splitPlaces (iterate (*2) 1)
