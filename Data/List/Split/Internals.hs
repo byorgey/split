@@ -1,4 +1,19 @@
 {-# LANGUAGE GADTs, Rank2Types, PatternGuards #-}
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.List.Split.Internal
+-- Copyright   :  (c) Brent Yorgey 2008
+-- License     :  BSD-style (see LICENSE)
+-- Maintainer  :  byorgey@gmail.com
+-- Stability   :  experimental
+-- Portability :  unportable (GADTs, Rank2Types)
+--
+-- Implementation module for "Data.List.Split", a combinator library
+-- for splitting lists.  See the "Data.List.Split" documentation for
+-- more description and examples.
+--
+-----------------------------------------------------------------------------
+
 module Data.List.Split.Internals where
 
 -- * Types and utilities

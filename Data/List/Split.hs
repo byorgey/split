@@ -1,4 +1,15 @@
--- | The "Data.List.Split" module ...
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.List.Split
+-- Copyright   :  (c) Brent Yorgey 2008
+-- License     :  BSD-style (see LICENSE)
+-- Maintainer  :  byorgey@gmail.com
+-- Stability   :  experimental
+-- Portability :  unportable (GADTs, Rank2Types)
+--
+-- The "Data.List.Split" module ...
+--
+-----------------------------------------------------------------------------
 module Data.List.Split (
 
                        -- * Splitting combinators
