@@ -117,8 +117,8 @@ splitInternal :: Delimiter a -> [a] -> SplitList a
 splitInternal _ [] = []
 splitInternal d xxs@(x:xs) | Just (match,rest) <- matchDelim d xxs = Delim match : splitInternal d rest
                    | otherwise = x `consChunk` splitInternal d xs
-  where consChunk x (Chunk c : ys) = Chunk (x:c) : ys
-        consChunk x ys             = Chunk [x] : ys
+  where consChunk z (Chunk c : ys) = Chunk (z:c) : ys
+        consChunk z ys             = Chunk [z] : ys
 
 -- | Given a split list in the internal tagged representation, produce
 --   the final output according to the strategy defined by the given
@@ -140,8 +140,8 @@ doDrop _ l = l
 -- | Condense multiple consecutive delimiters into one if the
 --   'CondensePolicy' is 'Condense'.
 doCondense :: CondensePolicy -> SplitList a -> SplitList a
-doCondense KeepBlankFields l = l
-doCondense Condense l = condense' l
+doCondense KeepBlankFields ls = ls
+doCondense Condense ls = condense' ls
   where condense' [] = []
         condense' (c@(Chunk _) : l) = c : condense' l
         condense' l = (Delim $ concatMap fromElem ds) : condense' rest
@@ -369,7 +369,7 @@ unintercalate = endBy
 --   piece will be shorter if @n@ does not evenly divide the length of
 --   the list.
 splitEvery :: Int -> [e] -> [[e]]
-splitEvery i l = map (take i) (build (splitter l)) where
+splitEvery i ls = map (take i) (build (splitter ls)) where
   splitter [] _ n = n
   splitter l c n  = l `c` splitter (drop i l) c n
 
@@ -386,7 +386,7 @@ chunk = splitEvery
 --   be inferred from the above examples and the fact that @splitPlaces@
 --   is total.
 splitPlaces :: [Int] -> [e] -> [[e]]
-splitPlaces ls xs = build (splitPlacer ls xs) where
+splitPlaces is ys = build (splitPlacer is ys) where
   splitPlacer [] _ _ n      = n
   splitPlacer _ [] _ n      = n
   splitPlacer (l:ls) xs c n = let (x1, x2) = splitAt l xs
