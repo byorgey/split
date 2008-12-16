@@ -58,6 +58,7 @@ data Delimiter a where
 matchDelim :: Delimiter a -> [a] -> Maybe ([a],[a])
 matchDelim (DelimEltPred p) (x:xs) | p x       = Just ([x],xs)
                                    | otherwise = Nothing
+matchDelim (DelimEltPred _) [] = Nothing
 matchDelim (DelimSublist []) xs = Just ([],xs)
 matchDelim (DelimSublist _)  [] = Nothing
 matchDelim (DelimSublist (d:ds)) (x:xs)
