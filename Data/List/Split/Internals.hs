@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, Rank2Types, PatternGuards #-}
+{-# LANGUAGE GADTs, Rank2Types #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.List.Split.Internal
@@ -78,7 +78,6 @@ matchDelim (DelimSublist []) xs = Just ([],xs)
 matchDelim (DelimSublist _)  [] = Nothing
 matchDelim (DelimSublist (d:ds)) (x:xs)
   | d == x = matchDelim (DelimSublist ds) xs >>= \(h,t) -> Just (d:h,t)
-                                          {- -- $$ (fmap.first) (d:) -}
   | otherwise = Nothing
 
 -- | What to do with delimiters?
@@ -131,8 +130,9 @@ build g = g (:) []
 --   @concatMap fromElem (splitInternal d l) == l@.
 splitInternal :: Delimiter a -> [a] -> SplitList a
 splitInternal _ [] = []
-splitInternal d xxs@(x:xs) | Just (match,rest) <- matchDelim d xxs = Delim match : splitInternal d rest
-                   | otherwise = x `consChunk` splitInternal d xs
+splitInternal d xxs@(x:xs) = case matchDelim d xxs of
+                               Just (match,rest) -> Delim match : splitInternal d rest
+                               _                 -> x `consChunk` splitInternal d xs
   where consChunk z (Chunk c : ys) = Chunk (z:c) : ys
         consChunk z ys             = Chunk [z] : ys
 
@@ -206,7 +206,9 @@ dropInitial _ l = l
 -- | Drop a final blank chunk according to the given 'EndPolicy'.
 dropFinal :: EndPolicy -> SplitList a -> SplitList a
 dropFinal _ [] = []
-dropFinal DropBlank l | Chunk [] <- last l = init l
+dropFinal DropBlank l = case last l of
+                          Chunk [] -> init l
+                          _ -> l
 dropFinal _ l = l
 
 -- * Combinators
