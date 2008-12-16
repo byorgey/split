@@ -34,6 +34,10 @@ data Splitter a = Splitter { delimiter        :: Delimiter a
 --
 --   This default strategy can be overridden to allow discarding
 --   various sorts of information.
+--
+--   Note that 'defaultSplitter' should usually not be used; use
+--   'oneOf', 'onSublist', or 'whenElt' instead (which are the same as
+--   the 'defaultSplitter' with just the delimiter overridden).
 defaultSplitter :: Splitter a
 defaultSplitter = Splitter { delimiter        = DelimEltPred (const False)
                            , delimPolicy      = Keep
@@ -191,7 +195,9 @@ dropFinal _ l = l
 
 -- * Combinators
 
--- | Split a list according to the given splitting strategy.
+-- | Split a list according to the given splitting strategy.  This is
+--   how to \"run\" a 'Splitter' that has been built using the other
+--   combinators.
 split :: Splitter a -> [a] -> [[a]]
 split s = postProcess s . splitInternal (delimiter s)
 
@@ -312,19 +318,24 @@ endsWithOneOf :: Eq a => [a] -> Splitter a
 endsWithOneOf = dropFinalBlank . keepDelimsR . oneOf
 
 -- ** Convenience functions
+--
+-- $ These functions implement some common splitting strategies.  Note
+--   that all of the functions in this section drop delimiters from
+--   the final output, since that is a more common use case even
+--   though it is not the default.
 
--- | Split on any of the given elements.  Equivalent to @split . oneOf@.
+-- | Split on any of the given elements.  Equivalent to @split . dropDelims . oneOf@.
 splitOneOf :: Eq a => [a] -> [a] -> [[a]]
-splitOneOf = split . oneOf
+splitOneOf = split . dropDelims . oneOf
 
--- | Split on the given sublist.  Equivalent to @split . onSublist@.
+-- | Split on the given sublist.  Equivalent to @split . dropDelims . onSublist@.
 splitOn :: Eq a => [a] -> [a] -> [[a]]
-splitOn   = split . onSublist
+splitOn   = split . dropDelims . onSublist
 
 -- | Split on elements satisfying the given predicate.  Equivalent to
---   @split . whenElt@.
+--   @split . dropDelims . whenElt@.
 splitWhen :: (a -> Bool) -> [a] -> [[a]]
-splitWhen = split . whenElt
+splitWhen = split . dropDelims . whenElt
 
 -- | A synonym for 'splitOn'.
 sepBy :: Eq a => [a] -> [a] -> [[a]]
@@ -335,14 +346,14 @@ sepByOneOf :: Eq a => [a] -> [a] -> [[a]]
 sepByOneOf = splitOneOf
 
 -- | Split into chunks terminated by the given subsequence.
---   Equivalent to @split . dropFinalBlank . onSublist@.
+--   Equivalent to @split . dropFinalBlank . dropDelims . onSublist@.
 endBy :: Eq a => [a] -> [a] -> [[a]]
-endBy = split . dropFinalBlank . onSublist
+endBy = split . dropFinalBlank . dropDelims . onSublist
 
 -- | Split into chunks terminated by one of the given elements.
---   Equivalent to @split . dropFinalBlank . oneOf@.
+--   Equivalent to @split . dropFinalBlank . dropDelims . oneOf@.
 endByOneOf :: Eq a => [a] -> [a] -> [[a]]
-endByOneOf = split . dropFinalBlank . oneOf
+endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 
 -- | A synonym for 'endBy'.  Note that this is the \"inverse\" of the
 --   'intercalate' function from "Data.List", in the sense that
@@ -380,7 +391,3 @@ splitPlaces ls xs = build (splitPlacer ls xs) where
   splitPlacer _ [] _ n      = n
   splitPlacer (l:ls) xs c n = let (x1, x2) = splitAt l xs
                               in  x1 `c` splitPlacer ls x2 c n
-
--- | Split a list into chunks sized by increasing powers of two.
-splitPowersOf2 :: [e] -> [[e]]
-splitPowersOf2 = splitPlaces (iterate (*2) 1)
