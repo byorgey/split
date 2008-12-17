@@ -9,7 +9,7 @@ import Text.Printf
 import Control.Monad
 
 import Data.Char
-import Data.List (isInfixOf)
+import Data.List (isInfixOf, tails)
 import Data.Maybe (isJust)
 
 newtype Elt = Elt { unElt :: Char }
@@ -70,7 +70,7 @@ main = do
             , ("splitInternal/lossless",        qc prop_splitInternal_lossless)
             , ("splitInternal/yields delims",   qc prop_splitInternal_yields_delims)
             , ("splitInternal/chunks",          qc prop_splitInternal_chunks_not_delims)
-            , ("condense/no consec delims",     qc prop_condense_no_consec_delims)
+            , ("doCondense/no consec delims",     qc prop_doCondense_no_consec_delims)
             , ("insBlanks/no consec delims",    qc prop_insBlanks_no_consec_delims)
             , ("insBlanks/fl not delims",       qc prop_insBlanks_fl_not_delim)
             , ("mergeL/no delims",              qc prop_mergeL_no_delims)
@@ -85,6 +85,12 @@ main = do
             , ("process/keepDelimsL no delims", qc prop_keepDelimsL_no_delims)
             , ("process/keepDelimsR no delims", qc prop_keepDelimsR_no_delims)
             , ("process/keepDelimsL match", qc prop_keepDelimsL_match)
+            , ("process/keepDelimsR match", qc prop_keepDelimsR_match)
+            , ("condense/no consec delims", qc prop_condense_no_consec_delims)
+            , ("condense/all delims", qc prop_condense_all_delims)
+            , ("dropInitBlank", qc prop_dropInitBlank)
+            , ("dropFinalBlank", qc prop_dropFinalBlank)
+            , ("dropBlanks", qc prop_dropBlanks)
             ]
 
 -- The default splitting strategy is the identity.
@@ -120,8 +126,8 @@ noConsecDelims [x] = True
 noConsecDelims (Delim _ : Delim _ : _) = False
 noConsecDelims (_ : xs) = noConsecDelims xs
 
-prop_condense_no_consec_delims :: SplitList Elt -> Bool
-prop_condense_no_consec_delims l = noConsecDelims $ doCondense Condense l
+prop_doCondense_no_consec_delims :: SplitList Elt -> Bool
+prop_doCondense_no_consec_delims l = noConsecDelims $ doCondense Condense l
 
 prop_insBlanks_no_consec_delims :: SplitList Elt -> Bool
 prop_insBlanks_no_consec_delims l = noConsecDelims $ insertBlanks l
@@ -186,6 +192,31 @@ prop_keepDelimsL_match (Blind s) l =
 prop_keepDelimsR_no_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
 prop_keepDelimsR_no_delims (Blind s) l = all (not . isDelim) (process (keepDelimsR s) l)
 
+prop_keepDelimsR_match :: Blind (Splitter Elt) -> [Elt] -> Bool
+prop_keepDelimsR_match (Blind s) l =
+  null p ||
+  all (any (isJust . matchDelim (delimiter s)) . tails)
+    [ c | Chunk c <- init p ]
+      where p = process (keepDelimsR s) l
+
+prop_condense_no_consec_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
+prop_condense_no_consec_delims (Blind s) l = noConsecDelims $ process (condense s) l
+
+prop_condense_all_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
+prop_condense_all_delims (Blind s) l = all allDelims p
+  where p = [ d | Delim d <- process (condense s) l ]
+        allDelims t = all isDelim (splitInternal (delimiter s) t)
+
+prop_dropInitBlank :: Blind (Splitter Elt) -> [Elt] -> Bool
+prop_dropInitBlank (Blind s) l = null p || head p /= Chunk []
+  where p = process (dropInitBlank s) l
+
+prop_dropFinalBlank :: Blind (Splitter Elt) -> [Elt] -> Bool
+prop_dropFinalBlank (Blind s) l = null p || last p /= Chunk []
+  where p = process (dropFinalBlank s) l
+
+prop_dropBlanks :: Splitter Elt -> [Elt] -> Bool
+prop_dropBlanks s = null . filter isChunk . process (dropBlanks s)
 
 {-
 -- | split at regular intervals
