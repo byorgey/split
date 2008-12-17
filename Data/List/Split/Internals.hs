@@ -118,6 +118,11 @@ isDelim :: SplitElem a -> Bool
 isDelim (Delim _) = True
 isDelim _ = False
 
+-- | Test whether a 'SplitElem' is a chunk.
+isChunk :: SplitElem a -> Bool
+isChunk (Chunk _) = True
+isChunk _ = False
+
 -- | Standard build function.
 build :: (forall b. (a -> b -> b) -> b -> b) -> [a]
 build g = g (:) []
