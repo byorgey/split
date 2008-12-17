@@ -131,6 +131,8 @@ build g = g (:) []
 splitInternal :: Delimiter a -> [a] -> SplitList a
 splitInternal _ [] = []
 splitInternal d xxs@(x:xs) = case matchDelim d xxs of
+                               -- special case for blank delimiter
+                               Just ([], (r:rs)) -> Delim [] : Chunk [r] : splitInternal d rs
                                Just (match,rest) -> Delim match : splitInternal d rest
                                _                 -> x `consChunk` splitInternal d xs
   where consChunk z (Chunk c : ys) = Chunk (z:c) : ys
@@ -380,6 +382,14 @@ endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 --   element of @l@.
 unintercalate :: Eq a => [a] -> [a] -> [[a]]
 unintercalate = endBy
+
+-- | \"Explode\" a list into a list of singletons.  Equivalent to
+--   @split . dropDelims . dropBlanks . onSublist []@.
+--
+-- XXX add more explanation somewhere else (in onSublist comments?)
+-- is there a better way to do this?  Eq constraint is annoying.
+explode :: Eq a => [a] -> [[a]]
+explode = split . dropDelims . dropBlanks $ onSublist []
 
 -- * Other splitting methods
 
