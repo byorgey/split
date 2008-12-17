@@ -32,6 +32,18 @@ instance Arbitrary a => Arbitrary (SplitElem a) where
                     , liftM Delim (listOf arbitrary)
                     ]
 
+instance Arbitrary DelimPolicy where
+  arbitrary = elements [Drop, Keep, KeepLeft, KeepRight]
+
+instance Arbitrary CondensePolicy where
+  arbitrary = elements [Condense, KeepBlankFields]
+
+instance Arbitrary EndPolicy where
+  arbitrary = elements [DropBlank, KeepBlank]
+
+instance (Arbitrary a, CoArbitrary a, Eq a) => Arbitrary (Splitter a) where
+  arbitrary = liftM5 Splitter arbitrary arbitrary arbitrary arbitrary arbitrary
+
 main :: IO ()
 main = do
     results <- mapM (\(s,t) -> printf "%-40s: " s >> t) tests
