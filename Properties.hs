@@ -7,17 +7,22 @@ import System.Environment
 import Text.Printf
 import Control.Monad
 
-newtype Elt = Elt Char
+import Data.Char
+
+newtype Elt = Elt { unElt :: Char }
   deriving (Eq)
 
 instance Show Elt where
   show (Elt c) = show c
 
 instance Arbitrary Elt where
-  arbitrary = elements (map Elt "abc")
+  arbitrary = elements (map Elt "abcde")
 
-instance (Arbitrary a) => Arbitrary (Delimiter a) where
-  arbitrary = oneOf [ liftM DelimEltPred arbitrary
+instance CoArbitrary Elt where
+  coarbitrary = coarbitrary . ord . unElt
+
+instance (Arbitrary a, CoArbitrary a, Eq a) => Arbitrary (Delimiter a) where
+  arbitrary = oneof [ liftM DelimEltPred arbitrary
                     , liftM DelimSublist arbitrary
                     ]
 
@@ -28,14 +33,42 @@ main = do
  where
     isSuccess (Success{}) = True
     isSuccess _ = False
-    qc = quickCheckResult
-    tests = [("default/id" , qc prop_default_id)]
+    qc x = quickCheckResult x
+    tests = [ ("default/id",         qc prop_default_id)
+            , ("match/decompose",    qc prop_match_decompose)
+            , ("match/yields delim", qc prop_match_yields_delim)
+            , ("splitInternal/lossless", qc prop_splitInternal_lossless)
+            , ("splitInternal/yields delims", qc prop_splitInternal_yields_delims)
+            , ("splitInternal/chunks", qc prop_splitInternal_chunks_not_delims)
+            ]
 
 -- The default splitting strategy is the identity.
 prop_default_id :: [Elt] -> Bool
 prop_default_id l = split defaultSplitter l == [l]
 
--- prop_match_decompose ::
+prop_match_decompose :: Blind (Delimiter Elt) -> [Elt] -> Bool
+prop_match_decompose (Blind d) l = maybe True ((==l) . uncurry (++)) $ matchDelim d l
+
+isDelimMatch :: Delimiter Elt -> [Elt] -> Bool
+isDelimMatch d l = matchDelim d l == Just (l,[])
+
+prop_match_yields_delim :: Blind (Delimiter Elt) -> [Elt] -> Bool
+prop_match_yields_delim (Blind d) l =
+    case matchDelim d l of
+      Nothing -> True
+      Just (del,rest) -> isDelimMatch d del
+
+prop_splitInternal_lossless :: Blind (Delimiter Elt) -> [Elt] -> Bool
+prop_splitInternal_lossless (Blind d) l = concatMap fromElem (splitInternal d l) == l
+
+prop_splitInternal_yields_delims :: Blind (Delimiter Elt) -> [Elt] -> Bool
+prop_splitInternal_yields_delims (Blind d) l =
+    all (isDelimMatch d) $ [ del | (Delim del) <- splitInternal d l ]
+
+prop_splitInternal_chunks_not_delims :: Blind (Delimiter Elt) -> [Elt] -> Bool
+prop_splitInternal_chunks_not_delims (Blind d) l =
+    all (not . isDelimMatch d) $ [ ch | (Chunk ch) <- splitInternal d l ]
+
 
 {-
 -- | split at regular intervals
