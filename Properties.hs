@@ -74,6 +74,10 @@ prop_splitInternal_chunks_not_delims :: Blind (Delimiter Elt) -> [Elt] -> Bool
 prop_splitInternal_chunks_not_delims (Blind d) l =
     all (not . isDelimMatch d) $ [ ch | (Chunk ch) <- splitInternal d l ]
 
+{-
+prop_condense :: SplitList Elt -> Bool
+prop_condense l = doCondense Condense l
+-}
 
 {-
 -- | split at regular intervals
