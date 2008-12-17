@@ -207,13 +207,13 @@ prop_condense_all_delims (Blind s) l = all allDelims p
   where p = [ d | Delim d <- process (condense s) l ]
         allDelims t = all isDelim (splitInternal (delimiter s) t)
 
-prop_dropInitBlank :: Blind (Splitter Elt) -> [Elt] -> Bool
-prop_dropInitBlank (Blind s) l = null p || head p /= Chunk []
-  where p = process (dropInitBlank s) l
+prop_dropInitBlank :: Splitter Elt -> [Elt] -> Bool
+prop_dropInitBlank s l = null p || head p /= Chunk []
+  where p = process (dropInitBlank $ s { delimPolicy = Keep } ) l
 
-prop_dropFinalBlank :: Blind (Splitter Elt) -> [Elt] -> Bool
-prop_dropFinalBlank (Blind s) l = null p || last p /= Chunk []
-  where p = process (dropFinalBlank s) l
+prop_dropFinalBlank :: Splitter Elt -> [Elt] -> Bool
+prop_dropFinalBlank s l = null p || last p /= Chunk []
+  where p = process (dropFinalBlank $ s { delimPolicy = Keep } ) l
 
 prop_dropBlanks :: Splitter Elt -> [Elt] -> Bool
 prop_dropBlanks s = null . filter (== (Chunk [])) . process (dropBlanks s)
