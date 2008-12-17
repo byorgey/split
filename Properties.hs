@@ -9,6 +9,7 @@ import Control.Monad
 
 import Data.Char
 import Data.List (isInfixOf)
+import Data.Maybe (isJust)
 
 newtype Elt = Elt { unElt :: Char }
   deriving (Eq)
@@ -46,30 +47,33 @@ instance (Arbitrary a, CoArbitrary a, Eq a) => Arbitrary (Splitter a) where
 
 main :: IO ()
 main = do
-    results <- mapM (\(s,t) -> printf "%-40s: " s >> t) tests
+    results <- mapM (\(s,t) -> printf "%-40s" s >> t) tests
     when (not . all isSuccess $ results) $ fail "Not all tests passed!"
  where
     isSuccess (Success{}) = True
     isSuccess _ = False
     qc x = quickCheckResult x
-    tests = [ ("default/id",         qc prop_default_id)
-            , ("match/decompose",    qc prop_match_decompose)
-            , ("match/yields delim", qc prop_match_yields_delim)
-            , ("splitInternal/lossless", qc prop_splitInternal_lossless)
-            , ("splitInternal/yields delims", qc prop_splitInternal_yields_delims)
-            , ("splitInternal/chunks", qc prop_splitInternal_chunks_not_delims)
-            , ("condense/no consec delims", qc prop_condense_no_consec_delims)
-            , ("insBlanks/no consec delims", qc prop_insBlanks_no_consec_delims)
-            , ("insBlanks/fl not delims", qc prop_insBlanks_fl_not_delim)
-            , ("mergeL/no delims", qc prop_mergeL_no_delims)
-            , ("mergeR/no delims", qc prop_mergeR_no_delims)
-            , ("oneOf", qc prop_oneOf)
-            , ("oneOf/not chunks", qc prop_oneOf_not_chunks)
-            , ("onSublist", qc prop_onSublist)
-            , ("onSublist/not chunks", qc prop_onSublist_not_chunks)
-            , ("whenElt", qc prop_whenElt)
-            , ("whenElt/not chunks", qc prop_whenElt_not_chunks)
-            , ("process/dropDelims", qc prop_dropDelims)
+    tests = [ ("default/id",                    qc prop_default_id)
+            , ("match/decompose",               qc prop_match_decompose)
+            , ("match/yields delim",            qc prop_match_yields_delim)
+            , ("splitInternal/lossless",        qc prop_splitInternal_lossless)
+            , ("splitInternal/yields delims",   qc prop_splitInternal_yields_delims)
+            , ("splitInternal/chunks",          qc prop_splitInternal_chunks_not_delims)
+            , ("condense/no consec delims",     qc prop_condense_no_consec_delims)
+            , ("insBlanks/no consec delims",    qc prop_insBlanks_no_consec_delims)
+            , ("insBlanks/fl not delims",       qc prop_insBlanks_fl_not_delim)
+            , ("mergeL/no delims",              qc prop_mergeL_no_delims)
+            , ("mergeR/no delims",              qc prop_mergeR_no_delims)
+            , ("oneOf",                         qc prop_oneOf)
+            , ("oneOf/not chunks",              qc prop_oneOf_not_chunks)
+            , ("onSublist",                     qc prop_onSublist)
+            , ("onSublist/not chunks",          qc prop_onSublist_not_chunks)
+            , ("whenElt",                       qc prop_whenElt)
+            , ("whenElt/not chunks",            qc prop_whenElt_not_chunks)
+            , ("process/dropDelims",            qc prop_dropDelims)
+            , ("process/keepDelimsL no delims", qc prop_keepDelimsL_no_delims)
+            , ("process/keepDelimsR no delims", qc prop_keepDelimsR_no_delims)
+            , ("process/keepDelimsL match", qc prop_keepDelimsL_match)
             ]
 
 -- The default splitting strategy is the identity.
@@ -158,6 +162,19 @@ process s = postProcess s . splitInternal (delimiter s)
 
 prop_dropDelims :: Blind (Splitter Elt) -> [Elt] -> Bool
 prop_dropDelims (Blind s) l = all (not . isDelim) (process (dropDelims s) l)
+
+prop_keepDelimsL_no_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
+prop_keepDelimsL_no_delims (Blind s) l = all (not . isDelim) (process (keepDelimsL s) l)
+
+prop_keepDelimsL_match :: Blind (Splitter Elt) -> [Elt] -> Bool
+prop_keepDelimsL_match (Blind s) l =
+  null p ||
+  all (isJust . matchDelim (delimiter s)) [ c | Chunk c <- tail p ]
+    where p = process (keepDelimsL s) l
+
+prop_keepDelimsR_no_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
+prop_keepDelimsR_no_delims (Blind s) l = all (not . isDelim) (process (keepDelimsR s) l)
+
 
 {-
 -- | split at regular intervals
