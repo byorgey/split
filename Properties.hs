@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances, StandaloneDeriving #-}
 module Properties where
 
 import Data.List.Split.Internals
@@ -22,6 +23,16 @@ instance Arbitrary Elt where
 
 instance CoArbitrary Elt where
   coarbitrary = coarbitrary . ord . unElt
+
+instance Show (Elt -> Bool) where
+  show p = "abcde -> " ++ map (toTF . p . Elt) "abcde"
+    where toTF b = if b then 'T' else 'F'
+
+instance Show (Delimiter Elt) where
+  show (DelimEltPred p) = show p
+  show (DelimSublist s) = show s
+
+deriving instance Show (Splitter Elt)
 
 instance (Arbitrary a, CoArbitrary a, Eq a) => Arbitrary (Delimiter a) where
   arbitrary = oneof [ liftM DelimEltPred arbitrary
