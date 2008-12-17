@@ -89,16 +89,19 @@ data DelimPolicy = Drop      -- ^ Drop delimiters from the output.
                              --   chunk.
                  | KeepRight -- ^ Keep delimiters in the output,
                              --   appending them to the previous chunk.
+  deriving (Eq, Show)
 
 -- | What to do with multiple consecutive delimiters?
 data CondensePolicy = Condense         -- ^ Condense into a single delimiter.
                     | KeepBlankFields  -- ^ Insert blank chunks
                                        --   between consecutive
                                        --   delimiters.
+  deriving (Eq, Show)
 
 -- | What to do with a blank chunk at either end of the list
 --   (i.e. when the list begins or ends with a delimiter).
 data EndPolicy = DropBlank | KeepBlank
+  deriving (Eq, Show)
 
 -- | Tag sublists as delimiters or chunks.
 data SplitElem a = Chunk [a] | Delim [a]
