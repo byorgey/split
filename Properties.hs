@@ -216,7 +216,7 @@ prop_dropFinalBlank (Blind s) l = null p || last p /= Chunk []
   where p = process (dropFinalBlank s) l
 
 prop_dropBlanks :: Splitter Elt -> [Elt] -> Bool
-prop_dropBlanks s = null . filter isChunk . process (dropBlanks s)
+prop_dropBlanks s = null . filter (== (Chunk [])) . process (dropBlanks s)
 
 {-
 -- | split at regular intervals
