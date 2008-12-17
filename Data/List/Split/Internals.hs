@@ -144,11 +144,11 @@ splitInternal d xxs@(x:xs) = case matchDelim d xxs of
         consChunk z ys             = Chunk [z] : ys
 
 -- | Given a split list in the internal tagged representation, produce
---   the final output according to the strategy defined by the given
+--   a new internal tagged representation corresponding to the final
+--   output, according to the strategy defined by the given
 --   'Splitter'.
-postProcess :: Splitter a -> SplitList a -> [[a]]
-postProcess s = map fromElem
-              . dropFinal (finalBlankPolicy s)
+postProcess :: Splitter a -> SplitList a -> SplitList a
+postProcess s = dropFinal (finalBlankPolicy s)
               . dropInitial (initBlankPolicy s)
               . doMerge (delimPolicy s)
               . doDrop (delimPolicy s)
@@ -224,7 +224,7 @@ dropFinal _ l = l
 --   how to \"run\" a 'Splitter' that has been built using the other
 --   combinators.
 split :: Splitter a -> [a] -> [[a]]
-split s = postProcess s . splitInternal (delimiter s)
+split s = map fromElem . postProcess s . splitInternal (delimiter s)
 
 -- ** Basic strategies
 --
