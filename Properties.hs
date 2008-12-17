@@ -26,6 +26,11 @@ instance (Arbitrary a, CoArbitrary a, Eq a) => Arbitrary (Delimiter a) where
                     , liftM DelimSublist arbitrary
                     ]
 
+instance Arbitrary a => Arbitrary (SplitElem a) where
+  arbitrary = oneof [ liftM Chunk (listOf arbitrary)
+                    , liftM Delim (listOf arbitrary)
+                    ]
+
 main :: IO ()
 main = do
     results <- mapM (\(s,t) -> printf "%-40s: " s >> t) tests
