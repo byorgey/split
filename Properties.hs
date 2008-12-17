@@ -63,7 +63,7 @@ main = do
  where
     isSuccess (Success{}) = True
     isSuccess _ = False
-    qc x = quickCheckResult x
+    qc x = quickCheckWithResult (stdArgs { maxSuccess = 200 }) x
     tests = [ ("default/id",                    qc prop_default_id)
             , ("match/decompose",               qc prop_match_decompose)
             , ("match/yields delim",            qc prop_match_yields_delim)
