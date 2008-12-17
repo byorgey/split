@@ -8,6 +8,7 @@ import Text.Printf
 import Control.Monad
 
 import Data.Char
+import Data.List (isInfixOf)
 
 newtype Elt = Elt { unElt :: Char }
   deriving (Eq)
@@ -45,6 +46,17 @@ main = do
             , ("splitInternal/lossless", qc prop_splitInternal_lossless)
             , ("splitInternal/yields delims", qc prop_splitInternal_yields_delims)
             , ("splitInternal/chunks", qc prop_splitInternal_chunks_not_delims)
+            , ("condense/no consec delims", qc prop_condense_no_consec_delims)
+            , ("insBlanks/no consec delims", qc prop_insBlanks_no_consec_delims)
+            , ("insBlanks/fl not delims", qc prop_insBlanks_fl_not_delim)
+            , ("mergeL/no delims", qc prop_mergeL_no_delims)
+            , ("mergeR/no delims", qc prop_mergeR_no_delims)
+            , ("oneOf", qc prop_oneOf)
+            , ("oneOf/not chunks", qc prop_oneOf_not_chunks)
+            , ("onSublist", qc prop_onSublist)
+            , ("onSublist/not chunks", qc prop_onSublist_not_chunks)
+            , ("whenElt", qc prop_whenElt)
+            , ("whenElt/not chunks", qc prop_whenElt_not_chunks)
             ]
 
 -- The default splitting strategy is the identity.
@@ -74,10 +86,59 @@ prop_splitInternal_chunks_not_delims :: Blind (Delimiter Elt) -> [Elt] -> Bool
 prop_splitInternal_chunks_not_delims (Blind d) l =
     all (not . isDelimMatch d) $ [ ch | (Chunk ch) <- splitInternal d l ]
 
-{-
-prop_condense :: SplitList Elt -> Bool
-prop_condense l = doCondense Condense l
--}
+noConsecDelims :: SplitList Elt -> Bool
+noConsecDelims [] = True
+noConsecDelims [x] = True
+noConsecDelims (Delim _ : Delim _ : _) = False
+noConsecDelims (_ : xs) = noConsecDelims xs
+
+prop_condense_no_consec_delims :: SplitList Elt -> Bool
+prop_condense_no_consec_delims l = noConsecDelims $ doCondense Condense l
+
+prop_insBlanks_no_consec_delims :: SplitList Elt -> Bool
+prop_insBlanks_no_consec_delims l = noConsecDelims $ insertBlanks l
+
+prop_insBlanks_fl_not_delim :: SplitList Elt -> Bool
+prop_insBlanks_fl_not_delim l =
+    case insertBlanks l of
+      [] -> True
+      xs -> (not . isDelim $ head xs) && (not . isDelim $ last xs)
+
+prop_mergeL_no_delims :: SplitList Elt -> Bool
+prop_mergeL_no_delims = all (not . isDelim) . mergeLeft . insertBlanks
+
+prop_mergeR_no_delims :: SplitList Elt -> Bool
+prop_mergeR_no_delims = all (not . isDelim) . mergeRight . insertBlanks
+
+getDelims :: Splitter Elt -> [Elt] -> [[Elt]]
+getDelims s l = [ d | Delim d <- splitInternal (delimiter s) l ]
+
+getChunks :: Splitter Elt -> [Elt] -> [[Elt]]
+getChunks s l = [ c | Chunk c <- splitInternal (delimiter s) l ]
+
+prop_oneOf :: [Elt] -> [Elt] -> Bool
+prop_oneOf elts l = all ((==1) . length) ds && all ((`elem` elts) . head) ds
+  where ds = getDelims (oneOf elts) l
+
+prop_oneOf_not_chunks :: [Elt] -> [Elt] -> Bool
+prop_oneOf_not_chunks elts l = all (not . (`elem` elts)) (concat cs)
+  where cs = getChunks (oneOf elts) l
+
+prop_onSublist :: [Elt] -> [Elt] -> Bool
+prop_onSublist sub l = all (==sub) $ getDelims (onSublist sub) l
+
+prop_onSublist_not_chunks :: [Elt] -> [Elt] -> Property
+prop_onSublist_not_chunks sub l =
+    (not . null $ sub) ==>
+      all (not . isInfixOf sub) $ getChunks (onSublist sub) l
+
+prop_whenElt :: Blind (Elt -> Bool) -> [Elt] -> Bool
+prop_whenElt (Blind p) l = all ((==1) . length) ds && all (p . head) ds
+  where ds = getDelims (whenElt p) l
+
+prop_whenElt_not_chunks :: Blind (Elt -> Bool) -> [Elt] -> Bool
+prop_whenElt_not_chunks (Blind p) l = all (not . p) (concat cs)
+  where cs = getChunks (whenElt p) l
 
 {-
 -- | split at regular intervals
