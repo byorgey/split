@@ -69,6 +69,7 @@ main = do
             , ("onSublist/not chunks", qc prop_onSublist_not_chunks)
             , ("whenElt", qc prop_whenElt)
             , ("whenElt/not chunks", qc prop_whenElt_not_chunks)
+            , ("process/dropDelims", qc prop_dropDelims)
             ]
 
 -- The default splitting strategy is the identity.
@@ -151,6 +152,12 @@ prop_whenElt (Blind p) l = all ((==1) . length) ds && all (p . head) ds
 prop_whenElt_not_chunks :: Blind (Elt -> Bool) -> [Elt] -> Bool
 prop_whenElt_not_chunks (Blind p) l = all (not . p) (concat cs)
   where cs = getChunks (whenElt p) l
+
+process :: Splitter Elt -> [Elt] -> SplitList Elt
+process s = postProcess s . splitInternal (delimiter s)
+
+prop_dropDelims :: Blind (Splitter Elt) -> [Elt] -> Bool
+prop_dropDelims (Blind s) l = all (not . isDelim) (process (dropDelims s) l)
 
 {-
 -- | split at regular intervals
