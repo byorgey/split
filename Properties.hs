@@ -39,8 +39,8 @@ instance (Arbitrary a, CoArbitrary a, Eq a) => Arbitrary (Delimiter a) where
                     , liftM DelimSublist arbitrary
                     ]
 
-instance Arbitrary a => Arbitrary (SplitElem a) where
-  arbitrary = oneof [ liftM Chunk (listOf arbitrary)
+instance Arbitrary a => Arbitrary (Chunk a) where
+  arbitrary = oneof [ liftM Text (listOf arbitrary)
                     , liftM Delim (listOf arbitrary)
                     ]
 
@@ -69,18 +69,18 @@ main = do
             , ("match/yields delim",            qc prop_match_yields_delim)
             , ("splitInternal/lossless",        qc prop_splitInternal_lossless)
             , ("splitInternal/yields delims",   qc prop_splitInternal_yields_delims)
-            , ("splitInternal/chunks",          qc prop_splitInternal_chunks_not_delims)
+            , ("splitInternal/text",            qc prop_splitInternal_text_not_delims)
             , ("doCondense/no consec delims",     qc prop_doCondense_no_consec_delims)
             , ("insBlanks/no consec delims",    qc prop_insBlanks_no_consec_delims)
             , ("insBlanks/fl not delims",       qc prop_insBlanks_fl_not_delim)
             , ("mergeL/no delims",              qc prop_mergeL_no_delims)
             , ("mergeR/no delims",              qc prop_mergeR_no_delims)
             , ("oneOf",                         qc prop_oneOf)
-            , ("oneOf/not chunks",              qc prop_oneOf_not_chunks)
+            , ("oneOf/not text",              qc prop_oneOf_not_text)
             , ("onSublist",                     qc prop_onSublist)
-            , ("onSublist/not chunks",          qc prop_onSublist_not_chunks)
+            , ("onSublist/not text",          qc prop_onSublist_not_text)
             , ("whenElt",                       qc prop_whenElt)
-            , ("whenElt/not chunks",            qc prop_whenElt_not_chunks)
+            , ("whenElt/not text",            qc prop_whenElt_not_text)
             , ("process/dropDelims",            qc prop_dropDelims)
             , ("process/keepDelimsL no delims", qc prop_keepDelimsL_no_delims)
             , ("process/keepDelimsR no delims", qc prop_keepDelimsR_no_delims)
@@ -116,9 +116,9 @@ prop_splitInternal_yields_delims :: Blind (Delimiter Elt) -> [Elt] -> Bool
 prop_splitInternal_yields_delims (Blind d) l =
     all (isDelimMatch d) $ [ del | (Delim del) <- splitInternal d l ]
 
-prop_splitInternal_chunks_not_delims :: Blind (Delimiter Elt) -> [Elt] -> Bool
-prop_splitInternal_chunks_not_delims (Blind d) l =
-    all (not . isDelimMatch d) $ [ ch | (Chunk ch) <- splitInternal d l ]
+prop_splitInternal_text_not_delims :: Blind (Delimiter Elt) -> [Elt] -> Bool
+prop_splitInternal_text_not_delims (Blind d) l =
+    all (not . isDelimMatch d) $ [ ch | (Text ch) <- splitInternal d l ]
 
 noConsecDelims :: SplitList Elt -> Bool
 noConsecDelims [] = True
@@ -147,32 +147,32 @@ prop_mergeR_no_delims = all (not . isDelim) . mergeRight . insertBlanks
 getDelims :: Splitter Elt -> [Elt] -> [[Elt]]
 getDelims s l = [ d | Delim d <- splitInternal (delimiter s) l ]
 
-getChunks :: Splitter Elt -> [Elt] -> [[Elt]]
-getChunks s l = [ c | Chunk c <- splitInternal (delimiter s) l ]
+getTexts :: Splitter Elt -> [Elt] -> [[Elt]]
+getTexts s l = [ c | Text c <- splitInternal (delimiter s) l ]
 
 prop_oneOf :: [Elt] -> [Elt] -> Bool
 prop_oneOf elts l = all ((==1) . length) ds && all ((`elem` elts) . head) ds
   where ds = getDelims (oneOf elts) l
 
-prop_oneOf_not_chunks :: [Elt] -> [Elt] -> Bool
-prop_oneOf_not_chunks elts l = all (not . (`elem` elts)) (concat cs)
-  where cs = getChunks (oneOf elts) l
+prop_oneOf_not_text :: [Elt] -> [Elt] -> Bool
+prop_oneOf_not_text elts l = all (not . (`elem` elts)) (concat cs)
+  where cs = getTexts (oneOf elts) l
 
 prop_onSublist :: [Elt] -> [Elt] -> Bool
 prop_onSublist sub l = all (==sub) $ getDelims (onSublist sub) l
 
-prop_onSublist_not_chunks :: [Elt] -> [Elt] -> Property
-prop_onSublist_not_chunks sub l =
+prop_onSublist_not_text :: [Elt] -> [Elt] -> Property
+prop_onSublist_not_text sub l =
     (not . null $ sub) ==>
-      all (not . isInfixOf sub) $ getChunks (onSublist sub) l
+      all (not . isInfixOf sub) $ getTexts (onSublist sub) l
 
 prop_whenElt :: Blind (Elt -> Bool) -> [Elt] -> Bool
 prop_whenElt (Blind p) l = all ((==1) . length) ds && all (p . head) ds
   where ds = getDelims (whenElt p) l
 
-prop_whenElt_not_chunks :: Blind (Elt -> Bool) -> [Elt] -> Bool
-prop_whenElt_not_chunks (Blind p) l = all (not . p) (concat cs)
-  where cs = getChunks (whenElt p) l
+prop_whenElt_not_text :: Blind (Elt -> Bool) -> [Elt] -> Bool
+prop_whenElt_not_text (Blind p) l = all (not . p) (concat cs)
+  where cs = getTexts (whenElt p) l
 
 process :: Splitter Elt -> [Elt] -> SplitList Elt
 process s = postProcess s . splitInternal (delimiter s)
@@ -186,7 +186,7 @@ prop_keepDelimsL_no_delims (Blind s) l = all (not . isDelim) (process (keepDelim
 prop_keepDelimsL_match :: Blind (Splitter Elt) -> [Elt] -> Bool
 prop_keepDelimsL_match (Blind s) l =
   null p ||
-  all (isJust . matchDelim (delimiter s)) [ c | Chunk c <- tail p ]
+  all (isJust . matchDelim (delimiter s)) [ c | Text c <- tail p ]
     where p = process (keepDelimsL s) l
 
 prop_keepDelimsR_no_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
@@ -196,7 +196,7 @@ prop_keepDelimsR_match :: Blind (Splitter Elt) -> [Elt] -> Bool
 prop_keepDelimsR_match (Blind s) l =
   null p ||
   all (any (isJust . matchDelim (delimiter s)) . tails)
-    [ c | Chunk c <- init p ]
+    [ c | Text c <- init p ]
       where p = process (keepDelimsR s) l
 
 prop_condense_no_consec_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
@@ -208,15 +208,15 @@ prop_condense_all_delims (Blind s) l = all allDelims p
         allDelims t = all isDelim (splitInternal (delimiter s) t)
 
 prop_dropInitBlank :: Splitter Elt -> [Elt] -> Bool
-prop_dropInitBlank s l = null p || head p /= Chunk []
+prop_dropInitBlank s l = null p || head p /= Text []
   where p = process (dropInitBlank $ s { delimPolicy = Keep } ) l
 
 prop_dropFinalBlank :: Splitter Elt -> [Elt] -> Bool
-prop_dropFinalBlank s l = null p || last p /= Chunk []
+prop_dropFinalBlank s l = null p || last p /= Text []
   where p = process (dropFinalBlank $ s { delimPolicy = Keep } ) l
 
 prop_dropBlanks :: Splitter Elt -> [Elt] -> Bool
-prop_dropBlanks s = null . filter (== (Chunk [])) . process (dropBlanks s)
+prop_dropBlanks s = null . filter (== (Text [])) . process (dropBlanks s)
 
 {-
 -- | split at regular intervals

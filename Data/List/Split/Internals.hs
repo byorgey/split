@@ -30,9 +30,9 @@ data Splitter a = Splitter { delimiter        :: Delimiter a
                                -- ^ What to do with multiple
                                --   consecutive delimiters
                            , initBlankPolicy  :: EndPolicy
-                               -- ^ Drop an initial blank chunk?
+                               -- ^ Drop an initial blank?
                            , finalBlankPolicy :: EndPolicy
-                               -- ^ Drop a final blank chunk?
+                               -- ^ Drop a final blank?
                            }
 
 -- | The default splitting strategy: keep delimiters in the output
@@ -103,28 +103,28 @@ data CondensePolicy = Condense         -- ^ Condense into a single delimiter.
 data EndPolicy = DropBlank | KeepBlank
   deriving (Eq, Show)
 
--- | Tag sublists as delimiters or chunks.
-data SplitElem a = Chunk [a] | Delim [a]
+-- | Tag chunks as delimiters or text.
+data Chunk a = Delim [a] | Text [a]
   deriving (Show, Eq)
 
 -- | Internal representation of a split list that tracks which pieces
 --   are delimiters and which aren't.
-type SplitList a = [SplitElem a]
+type SplitList a = [Chunk a]
 
--- | Untag a 'SplitElem'.
-fromElem :: SplitElem a -> [a]
-fromElem (Chunk as) = as
+-- | Untag a 'Chunk'.
+fromElem :: Chunk a -> [a]
+fromElem (Text as) = as
 fromElem (Delim as) = as
 
--- | Test whether a 'SplitElem' is a delimiter.
-isDelim :: SplitElem a -> Bool
+-- | Test whether a 'Chunk' is a delimiter.
+isDelim :: Chunk a -> Bool
 isDelim (Delim _) = True
 isDelim _ = False
 
--- | Test whether a 'SplitElem' is a chunk.
-isChunk :: SplitElem a -> Bool
-isChunk (Chunk _) = True
-isChunk _ = False
+-- | Test whether a 'Chunk' is text.
+isText :: Chunk a -> Bool
+isText (Text _) = True
+isText _ = False
 
 -- | Standard build function.
 build :: (forall b. (a -> b -> b) -> b -> b) -> [a]
@@ -133,18 +133,18 @@ build g = g (:) []
 -- * Implementation
 
 -- | Given a delimiter to use, split a list into an internal
---   representation with sublists tagged as delimiters or chunks.
---   This transformation is lossless; in particular,
---   @concatMap fromElem (splitInternal d l) == l@.
+--   representation with chunks tagged as delimiters or text.  This
+--   transformation is lossless; in particular, @concatMap fromElem
+--   (splitInternal d l) == l@.
 splitInternal :: Delimiter a -> [a] -> SplitList a
 splitInternal _ [] = []
 splitInternal d xxs@(x:xs) = case matchDelim d xxs of
                                -- special case for blank delimiter
-                               Just ([], (r:rs)) -> Delim [] : Chunk [r] : splitInternal d rs
+                               Just ([], (r:rs)) -> Delim [] : Text [r] : splitInternal d rs
                                Just (match,rest) -> Delim match : splitInternal d rest
-                               _                 -> x `consChunk` splitInternal d xs
-  where consChunk z (Chunk c : ys) = Chunk (z:c) : ys
-        consChunk z ys             = Chunk [z] : ys
+                               _                 -> x `consText` splitInternal d xs
+  where consText z (Text c : ys) = Text (z:c) : ys
+        consText z ys             = Text [z] : ys
 
 -- | Given a split list in the internal tagged representation, produce
 --   a new internal tagged representation corresponding to the final
@@ -160,7 +160,7 @@ postProcess s = dropFinal (finalBlankPolicy s)
 
 -- | Drop delimiters if the 'DelimPolicy' is 'Drop'.
 doDrop :: DelimPolicy -> SplitList a -> SplitList a
-doDrop Drop l = [ c | c@(Chunk _) <- l ]
+doDrop Drop l = [ c | c@(Text _) <- l ]
 doDrop _ l = l
 
 -- | Condense multiple consecutive delimiters into one if the
@@ -169,7 +169,7 @@ doCondense :: CondensePolicy -> SplitList a -> SplitList a
 doCondense KeepBlankFields ls = ls
 doCondense Condense ls = condense' ls
   where condense' [] = []
-        condense' (c@(Chunk _) : l) = c : condense' l
+        condense' (c@(Text _) : l) = c : condense' l
         condense' l = (Delim $ concatMap fromElem ds) : condense' rest
           where (ds,rest) = span isDelim l
 
@@ -177,15 +177,15 @@ doCondense Condense ls = condense' ls
 --   and at the beginning/end if the first/last element is a
 --   delimiter.
 insertBlanks :: SplitList a -> SplitList a
-insertBlanks [] = [Chunk []]
-insertBlanks (d@(Delim _) : l) = Chunk [] : insertBlanks' (d:l)
+insertBlanks [] = [Text []]
+insertBlanks (d@(Delim _) : l) = Text [] : insertBlanks' (d:l)
 insertBlanks l = insertBlanks' l
 
 -- | Insert blank chunks between consecutive delimiters.
 insertBlanks' :: SplitList a -> SplitList a
 insertBlanks' [] = []
-insertBlanks' (d1@(Delim _) : d2@(Delim _) : l) = d1 : Chunk [] : insertBlanks' (d2:l)
-insertBlanks' [d@(Delim _)] = [d, Chunk []]
+insertBlanks' (d1@(Delim _) : d2@(Delim _) : l) = d1 : Text [] : insertBlanks' (d2:l)
+insertBlanks' [d@(Delim _)] = [d, Text []]
 insertBlanks' (c : l) = c : insertBlanks' l
 
 -- | Merge delimiters into adjacent chunks according to the 'DelimPolicy'.
@@ -199,25 +199,25 @@ doMerge _ = id
 --   chunks, so they are merged with chunks to their right).
 mergeLeft :: SplitList a -> SplitList a
 mergeLeft [] = []
-mergeLeft ((Delim d) : (Chunk c) : l) = Chunk (d++c) : mergeLeft l
+mergeLeft ((Delim d) : (Text c) : l) = Text (d++c) : mergeLeft l
 mergeLeft (c : l) = c : mergeLeft l
 
 -- | Merge delimiters with adjacent chunks to the left.
 mergeRight :: SplitList a -> SplitList a
 mergeRight [] = []
-mergeRight ((Chunk c) : (Delim d) : l) = Chunk (c++d) : mergeRight l
+mergeRight ((Text c) : (Delim d) : l) = Text (c++d) : mergeRight l
 mergeRight (c : l) = c : mergeRight l
 
 -- | Drop an initial blank chunk according to the given 'EndPolicy'.
 dropInitial :: EndPolicy -> SplitList a -> SplitList a
-dropInitial DropBlank (Chunk [] : l) = l
+dropInitial DropBlank (Text [] : l) = l
 dropInitial _ l = l
 
 -- | Drop a final blank chunk according to the given 'EndPolicy'.
 dropFinal :: EndPolicy -> SplitList a -> SplitList a
 dropFinal _ [] = []
 dropFinal DropBlank l = case last l of
-                          Chunk [] -> init l
+                          Text [] -> init l
                           _ -> l
 dropFinal _ l = l
 
