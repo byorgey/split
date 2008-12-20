@@ -9,7 +9,7 @@ import Text.Printf
 import Control.Monad
 
 import Data.Char
-import Data.List (isInfixOf, isPrefixOf, isSuffixOf, tails, intercalate)
+import Data.List (isInfixOf, isPrefixOf, isSuffixOf, tails, intercalate, genericTake)
 import Data.Maybe (isJust)
 
 newtype Elt = Elt { unElt :: Char }
@@ -99,9 +99,12 @@ main = do
             , ("unintercalate/right inv", qc prop_unintercalate_right_inv)
             , ("unintercalate/left inv", qc prop_unintercalate_left_inv)
             , ("unintercalate/idem", qc prop_unintercalate_intercalate_idem)
-            , -} ("splitEvery/all n", qc prop_splitEvery_all_n)
+            , -} ("splitEvery/lengths", qc prop_splitEvery_all_n)
             , ("splitEvery/last <= n", qc prop_splitEvery_last_less_n)
             , ("splitEvery/preserve", qc prop_splitEvery_preserve)
+            , ("splitPlaces/lengths", qc prop_splitPlaces_lengths)
+            , ("splitPlaces/last <= n", qc prop_splitPlaces_last_less_n)
+            , ("splitPlaces/preserve", qc prop_splitPlaces_preserve)
             ]
 
 -- The default splitting strategy is the identity.
@@ -258,6 +261,27 @@ prop_splitEvery_last_less_n (Positive n) (NonEmpty l) = (<=n) . length . last $ 
 
 prop_splitEvery_preserve :: Positive Int -> [Elt] -> Bool
 prop_splitEvery_preserve (Positive n) l = concat (splitEvery n l) == l
+
+prop_splitPlaces_lengths :: [NonNegative Int] -> [Elt] -> Bool
+prop_splitPlaces_lengths ps = and . mInit . zipWith (==) ps' . map length . splitPlaces ps'
+  where ps' = map unNN ps
+
+prop_splitPlaces_last_less_n :: NonEmptyList (NonNegative Int) -> NonEmptyList Elt -> Bool
+prop_splitPlaces_last_less_n (NonEmpty ps) (NonEmpty l) = (head $ drop (length l' - 1) ps') >= length (last l')
+  where l' = splitPlaces ps' l
+        ps' = map unNN ps
+
+prop_splitPlaces_preserve :: [NonNegative Integer] -> [Elt] -> Bool
+prop_splitPlaces_preserve ps l = concat (splitPlaces ps' l) == genericTake (sum ps') l
+  where ps' = map unNN ps
+
+unNN :: NonNegative a -> a
+unNN (NonNegative x) = x
+
+mInit :: [a] -> [a]
+mInit [] = []
+mInit [x] = []
+mInit (x:xs) = x : init xs
 
 {-
 -- | split at regular intervals

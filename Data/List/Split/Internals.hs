@@ -16,6 +16,8 @@
 
 module Data.List.Split.Internals where
 
+import Data.List (genericSplitAt)
+
 -- * Types and utilities
 
 -- | A splitting strategy.
@@ -424,9 +426,9 @@ explode = splitEvery 1
 --   The behavior of @splitPlaces ls xs@ when @sum ls /= length xs@ can
 --   be inferred from the above examples and the fact that @splitPlaces@
 --   is total.
-splitPlaces :: [Int] -> [e] -> [[e]]
+splitPlaces :: Integral a => [a] -> [e] -> [[e]]
 splitPlaces is ys = build (splitPlacer is ys) where
   splitPlacer [] _ _ n      = n
   splitPlacer _ [] _ n      = n
-  splitPlacer (l:ls) xs c n = let (x1, x2) = splitAt l xs
+  splitPlacer (l:ls) xs c n = let (x1, x2) = genericSplitAt l xs
                               in  x1 `c` splitPlacer ls x2 c n
