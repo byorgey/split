@@ -332,16 +332,16 @@ startsWithOneOf :: Eq a => [a] -> Splitter a
 startsWithOneOf = dropInitBlank . keepDelimsL . oneOf
 
 -- | Make a strategy that splits a list into chunks that all end with
---   the given subsequence.  Equivalent to @dropFinalBlank
---   . keepDelimsR . onSublist@.  For example:
+--   the given subsequence, except possibly the last.  Equivalent to
+--   @dropFinalBlank . keepDelimsR . onSublist@.  For example:
 --
 -- > split (endsWith "ly") "happilyslowlygnarlylily" == ["happily","slowly","gnarly","lily"]
 endsWith :: Eq a => [a] -> Splitter a
 endsWith = dropFinalBlank . keepDelimsR . onSublist
 
--- | Make a strategy that splits a list into chunks that all start
---   with one of the given elements.  Equivalent to @dropFinalBlank
---   . keepDelimsR . oneOf@.  For example:
+-- | Make a strategy that splits a list into chunks that all end with
+--   one of the given elements, except possibly the last.  Equivalent
+--   to @dropFinalBlank . keepDelimsR . oneOf@.  For example:
 --
 -- > split (condense $ endsWithOneOf ".,?! ") "Hi, there!  How are you?" == ["Hi, ","there!  ","How ","are ","you?"]
 endsWithOneOf :: Eq a => [a] -> Splitter a

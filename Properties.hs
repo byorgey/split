@@ -93,6 +93,8 @@ main = do
             , ("dropBlanks", qc prop_dropBlanks)
             , ("startsWith", qc prop_startsWith)
             , ("startsWithOneOf", qc prop_startsWithOneOf)
+            , ("endsWith", qc prop_endsWith)
+            , ("endsWithOneOf", qc prop_endsWithOneOf)
             ]
 
 -- The default splitting strategy is the identity.
@@ -223,6 +225,12 @@ prop_startsWith s (NonEmpty l) = all (s `isPrefixOf`) (tail $ split (startsWith 
 
 prop_startsWithOneOf :: [Elt] -> NonEmptyList Elt -> Bool
 prop_startsWithOneOf elts (NonEmpty l) = all ((`elem` elts) . head) (tail $ split (startsWithOneOf elts) l)
+
+prop_endsWith :: [Elt] -> NonEmptyList Elt -> Bool
+prop_endsWith s (NonEmpty l) = all (s `isSuffixOf`) (init $ split (endsWith s) l)
+
+prop_endsWithOneOf :: [Elt] -> NonEmptyList Elt -> Bool
+prop_endsWithOneOf elts (NonEmpty l) = all ((`elem` elts) . last) (init $ split (endsWithOneOf elts) l)
 
 {-
 -- | split at regular intervals
