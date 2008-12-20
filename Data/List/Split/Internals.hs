@@ -387,12 +387,15 @@ endBy = split . dropFinalBlank . dropDelims . onSublist
 endByOneOf :: Eq a => [a] -> [a] -> [[a]]
 endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 
--- | A synonym for 'sepBy'.  Note that this is the \"inverse\" of the
---   'intercalate' function from "Data.List", in the sense that
---   @intercalate x . unintercalate x == id@, and @unintercalate x
---   . intercalate x@ is the identity on nonempty lists none of whose
---   elements contain @x@ as an infix.  Additionally, @unintercalate x
---   . intercalate x@ is idempotent.
+-- | A synonym for 'sepBy'.  Note that this is the right inverse of
+--   the 'intercalate' function from "Data.List", that is,
+--   @intercalate x . unintercalate x == id@.  It is also the case
+--   that @unintercalate x . intercalate x@ is idempotent.
+--   @unintercalate x . intercalate x@ is the identity on certain
+--   lists, but it is tricky to state the precise conditions under
+--   which this holds.  (For example, it is not enough to say that @x@
+--   does not occur in any elements of the input list.  Working out
+--   why is left as an exercise for the reader.
 unintercalate :: Eq a => [a] -> [a] -> [[a]]
 unintercalate = sepBy
 

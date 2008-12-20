@@ -64,47 +64,46 @@ main = do
     isSuccess (Success{}) = True
     isSuccess _ = False
     qc x = quickCheckWithResult (stdArgs { maxSuccess = 200 }) x
-    tests = [
-        {-      ("default/id",                    qc prop_default_id)
+    tests = [ ("default/id",                    qc prop_default_id)
             , ("match/decompose",               qc prop_match_decompose)
             , ("match/yields delim",            qc prop_match_yields_delim)
             , ("splitInternal/lossless",        qc prop_splitInternal_lossless)
             , ("splitInternal/yields delims",   qc prop_splitInternal_yields_delims)
             , ("splitInternal/text",            qc prop_splitInternal_text_not_delims)
-            , ("doCondense/no consec delims",     qc prop_doCondense_no_consec_delims)
+            , ("doCondense/no consec delims",   qc prop_doCondense_no_consec_delims)
             , ("insBlanks/no consec delims",    qc prop_insBlanks_no_consec_delims)
             , ("insBlanks/fl not delims",       qc prop_insBlanks_fl_not_delim)
             , ("mergeL/no delims",              qc prop_mergeL_no_delims)
             , ("mergeR/no delims",              qc prop_mergeR_no_delims)
             , ("oneOf",                         qc prop_oneOf)
-            , ("oneOf/not text",              qc prop_oneOf_not_text)
+            , ("oneOf/not text",                qc prop_oneOf_not_text)
             , ("onSublist",                     qc prop_onSublist)
-            , ("onSublist/not text",          qc prop_onSublist_not_text)
+            , ("onSublist/not text",            qc prop_onSublist_not_text)
             , ("whenElt",                       qc prop_whenElt)
-            , ("whenElt/not text",            qc prop_whenElt_not_text)
+            , ("whenElt/not text",              qc prop_whenElt_not_text)
             , ("process/dropDelims",            qc prop_dropDelims)
             , ("process/keepDelimsL no delims", qc prop_keepDelimsL_no_delims)
             , ("process/keepDelimsR no delims", qc prop_keepDelimsR_no_delims)
-            , ("process/keepDelimsL match", qc prop_keepDelimsL_match)
-            , ("process/keepDelimsR match", qc prop_keepDelimsR_match)
-            , ("condense/no consec delims", qc prop_condense_no_consec_delims)
-            , ("condense/all delims", qc prop_condense_all_delims)
-            , ("dropInitBlank", qc prop_dropInitBlank)
-            , ("dropFinalBlank", qc prop_dropFinalBlank)
-            , ("dropBlanks", qc prop_dropBlanks)
-            , ("startsWith", qc prop_startsWith)
-            , ("startsWithOneOf", qc prop_startsWithOneOf)
-            , ("endsWith", qc prop_endsWith)
-            , ("endsWithOneOf", qc prop_endsWithOneOf)
-            , ("unintercalate/right inv", qc prop_unintercalate_right_inv)
-            , ("unintercalate/left inv", qc prop_unintercalate_left_inv)
-            , ("unintercalate/idem", qc prop_unintercalate_intercalate_idem)
-            , -} ("splitEvery/lengths", qc prop_splitEvery_all_n)
-            , ("splitEvery/last <= n", qc prop_splitEvery_last_less_n)
-            , ("splitEvery/preserve", qc prop_splitEvery_preserve)
-            , ("splitPlaces/lengths", qc prop_splitPlaces_lengths)
-            , ("splitPlaces/last <= n", qc prop_splitPlaces_last_less_n)
-            , ("splitPlaces/preserve", qc prop_splitPlaces_preserve)
+            , ("process/keepDelimsL match",     qc prop_keepDelimsL_match)
+            , ("process/keepDelimsR match",     qc prop_keepDelimsR_match)
+            , ("condense/no consec delims",     qc prop_condense_no_consec_delims)
+            , ("condense/all delims",           qc prop_condense_all_delims)
+            , ("dropInitBlank",                 qc prop_dropInitBlank)
+            , ("dropFinalBlank",                qc prop_dropFinalBlank)
+            , ("dropBlanks",                    qc prop_dropBlanks)
+            , ("startsWith",                    qc prop_startsWith)
+            , ("startsWithOneOf",               qc prop_startsWithOneOf)
+            , ("endsWith",                      qc prop_endsWith)
+            , ("endsWithOneOf",                 qc prop_endsWithOneOf)
+            , ("unintercalate/right inv",       qc prop_unintercalate_right_inv)
+       --   , ("unintercalate/left inv",        qc prop_unintercalate_left_inv)
+            , ("unintercalate/idem",            qc prop_unintercalate_intercalate_idem)
+            , ("splitEvery/lengths",            qc prop_splitEvery_all_n)
+            , ("splitEvery/last <= n",          qc prop_splitEvery_last_less_n)
+            , ("splitEvery/preserve",           qc prop_splitEvery_preserve)
+            , ("splitPlaces/lengths",           qc prop_splitPlaces_lengths)
+            , ("splitPlaces/last <= n",         qc prop_splitPlaces_last_less_n)
+            , ("splitPlaces/preserve",          qc prop_splitPlaces_preserve)
             ]
 
 -- The default splitting strategy is the identity.
@@ -245,9 +244,18 @@ prop_endsWithOneOf elts (NonEmpty l) = all ((`elem` elts) . last) (init $ split 
 prop_unintercalate_right_inv :: [Elt] -> [Elt] -> Bool
 prop_unintercalate_right_inv x l = intercalate x (unintercalate x l) == l
 
+{- This property fails: for example,
+
+      unintercalate "dd" (intercalate "dd" ["d",""]) == ["","d"]
+
+  so it's not enough just to say that the delimiter is not an infix of
+  any elements of l!
+
+
 prop_unintercalate_left_inv :: [Elt] -> NonEmptyList [Elt] -> Property
 prop_unintercalate_left_inv x (NonEmpty ls) = not (any (x `isInfixOf`) ls) ==>
                                       unintercalate x (intercalate x ls) == ls
+-}
 
 prop_unintercalate_intercalate_idem :: [Elt] -> [[Elt]] -> Bool
 prop_unintercalate_intercalate_idem x ls = f (f ls) == f ls
