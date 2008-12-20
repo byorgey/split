@@ -104,6 +104,7 @@ main = do
             , ("splitPlaces/lengths",           qc prop_splitPlaces_lengths)
             , ("splitPlaces/last <= n",         qc prop_splitPlaces_last_less_n)
             , ("splitPlaces/preserve",          qc prop_splitPlaces_preserve)
+            , ("lines",                         qc prop_lines)
             ]
 
 prop_default_id :: [Elt] -> Bool
@@ -289,3 +290,13 @@ mInit :: [a] -> [a]
 mInit [] = []
 mInit [x] = []
 mInit (x:xs) = x : init xs
+
+newtype EltNL = EltNL { unEltNL :: Char }
+  deriving (Eq, Show)
+
+instance Arbitrary EltNL where
+  arbitrary = elements (map EltNL "abcde\n")
+
+prop_lines :: [EltNL] -> Bool
+prop_lines s = lines s' == endBy "\n" s'
+  where s' = map unEltNL s
