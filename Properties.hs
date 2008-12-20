@@ -9,7 +9,7 @@ import Text.Printf
 import Control.Monad
 
 import Data.Char
-import Data.List (isInfixOf, isPrefixOf, isSuffixOf, tails)
+import Data.List (isInfixOf, isPrefixOf, isSuffixOf, tails, intercalate)
 import Data.Maybe (isJust)
 
 newtype Elt = Elt { unElt :: Char }
@@ -95,6 +95,8 @@ main = do
             , ("startsWithOneOf", qc prop_startsWithOneOf)
             , ("endsWith", qc prop_endsWith)
             , ("endsWithOneOf", qc prop_endsWithOneOf)
+            , ("unintercalate/right inv", qc prop_unintercalate_right_inv)
+            , ("unintercalate/left inv", qc prop_unintercalate_left_inv)
             ]
 
 -- The default splitting strategy is the identity.
@@ -231,6 +233,14 @@ prop_endsWith s (NonEmpty l) = all (s `isSuffixOf`) (init $ split (endsWith s) l
 
 prop_endsWithOneOf :: [Elt] -> NonEmptyList Elt -> Bool
 prop_endsWithOneOf elts (NonEmpty l) = all ((`elem` elts) . last) (init $ split (endsWithOneOf elts) l)
+
+-- XXX fix these!
+prop_unintercalate_right_inv :: [Elt] -> [Elt] -> Bool
+prop_unintercalate_right_inv x l = intercalate x (unintercalate x l) == l
+
+prop_unintercalate_left_inv :: [Elt] -> [[Elt]] -> Property
+prop_unintercalate_left_inv x ls = not (any (x `isInfixOf`) ls) ==>
+                                     unintercalate x (intercalate x ls) == ls
 
 {-
 -- | split at regular intervals

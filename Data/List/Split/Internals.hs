@@ -387,9 +387,9 @@ endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 
 -- | A synonym for 'endBy'.  Note that this is the \"inverse\" of the
 --   'intercalate' function from "Data.List", in the sense that
---   @intercalate x (unintercalate x l) == l@, and @unintercalate x
---   (intercalate x l) == l@ as long as @x@ is not an infix of any
---   element of @l@.
+--   @intercalate x . unintercalate x == id@, and @unintercalate x
+--   . intercalate x@ is the identity on lists none of whose elements
+--   contain @x@ as an infix.
 unintercalate :: Eq a => [a] -> [a] -> [[a]]
 unintercalate = endBy
 
