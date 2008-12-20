@@ -185,18 +185,16 @@ prop_dropDelims (Blind s) l = all (not . isDelim) (process (dropDelims s) l)
 prop_keepDelimsL_no_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
 prop_keepDelimsL_no_delims (Blind s) l = all (not . isDelim) (process (keepDelimsL s) l)
 
-prop_keepDelimsL_match :: Blind (Splitter Elt) -> [Elt] -> Bool
-prop_keepDelimsL_match (Blind s) l =
-  null p ||
+prop_keepDelimsL_match :: Blind (Splitter Elt) -> NonEmptyList Elt -> Bool
+prop_keepDelimsL_match (Blind s) (NonEmpty l) =
   all (isJust . matchDelim (delimiter s)) [ c | Text c <- tail p ]
     where p = process (keepDelimsL s) l
 
 prop_keepDelimsR_no_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
 prop_keepDelimsR_no_delims (Blind s) l = all (not . isDelim) (process (keepDelimsR s) l)
 
-prop_keepDelimsR_match :: Blind (Splitter Elt) -> [Elt] -> Bool
-prop_keepDelimsR_match (Blind s) l =
-  null p ||
+prop_keepDelimsR_match :: Blind (Splitter Elt) -> NonEmptyList Elt -> Bool
+prop_keepDelimsR_match (Blind s) (NonEmpty l) =
   all (any (isJust . matchDelim (delimiter s)) . tails)
     [ c | Text c <- init p ]
       where p = process (keepDelimsR s) l
@@ -209,12 +207,12 @@ prop_condense_all_delims (Blind s) l = all allDelims p
   where p = [ d | Delim d <- process (condense s) l ]
         allDelims t = all isDelim (splitInternal (delimiter s) t)
 
-prop_dropInitBlank :: Splitter Elt -> [Elt] -> Bool
-prop_dropInitBlank s l = null p || head p /= Text []
+prop_dropInitBlank :: Splitter Elt -> NonEmptyList Elt -> Bool
+prop_dropInitBlank s (NonEmpty l) = head p /= Text []
   where p = process (dropInitBlank $ s { delimPolicy = Keep } ) l
 
-prop_dropFinalBlank :: Splitter Elt -> [Elt] -> Bool
-prop_dropFinalBlank s l = null p || last p /= Text []
+prop_dropFinalBlank :: Splitter Elt -> NonEmptyList Elt -> Bool
+prop_dropFinalBlank s (NonEmpty l) = last p /= Text []
   where p = process (dropFinalBlank $ s { delimPolicy = Keep } ) l
 
 prop_dropBlanks :: Splitter Elt -> [Elt] -> Bool
