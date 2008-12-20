@@ -9,7 +9,7 @@ import Text.Printf
 import Control.Monad
 
 import Data.Char
-import Data.List (isInfixOf, tails)
+import Data.List (isInfixOf, isPrefixOf, isSuffixOf, tails)
 import Data.Maybe (isJust)
 
 newtype Elt = Elt { unElt :: Char }
@@ -91,6 +91,8 @@ main = do
             , ("dropInitBlank", qc prop_dropInitBlank)
             , ("dropFinalBlank", qc prop_dropFinalBlank)
             , ("dropBlanks", qc prop_dropBlanks)
+            , ("startsWith", qc prop_startsWith)
+            , ("startsWithOneOf", qc prop_startsWithOneOf)
             ]
 
 -- The default splitting strategy is the identity.
@@ -217,6 +219,12 @@ prop_dropFinalBlank s l = null p || last p /= Text []
 
 prop_dropBlanks :: Splitter Elt -> [Elt] -> Bool
 prop_dropBlanks s = null . filter (== (Text [])) . process (dropBlanks s)
+
+prop_startsWith :: [Elt] -> NonEmptyList Elt -> Bool
+prop_startsWith s (NonEmpty l) = all (s `isPrefixOf`) (tail $ split (startsWith s) l)
+
+prop_startsWithOneOf :: [Elt] -> NonEmptyList Elt -> Bool
+prop_startsWithOneOf elts (NonEmpty l) = all ((`elem` elts) . head) (tail $ split (startsWithOneOf elts) l)
 
 {-
 -- | split at regular intervals

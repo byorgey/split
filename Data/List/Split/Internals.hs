@@ -314,8 +314,9 @@ dropBlanks :: Splitter a -> Splitter a
 dropBlanks = dropInitBlank . dropFinalBlank . condense
 
 -- | Make a strategy that splits a list into chunks that all start
---   with the given subsequence.  Equivalent to @dropInitBlank
---   . keepDelimsL . onSublist@.  For example:
+--   with the given subsequence (except possibly the first).
+--   Equivalent to @dropInitBlank . keepDelimsL . onSublist@.  For
+--   example:
 --
 -- > split (startsWith "app") "applyappicativeapplaudapproachapple" == ["apply","appicative","applaud","approach","apple"]
 startsWith :: Eq a => [a] -> Splitter a
