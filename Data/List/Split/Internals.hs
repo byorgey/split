@@ -385,19 +385,21 @@ endBy = split . dropFinalBlank . dropDelims . onSublist
 endByOneOf :: Eq a => [a] -> [a] -> [[a]]
 endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 
--- | A synonym for 'endBy'.  Note that this is the \"inverse\" of the
+-- | A synonym for 'sepBy'.  Note that this is the \"inverse\" of the
 --   'intercalate' function from "Data.List", in the sense that
 --   @intercalate x . unintercalate x == id@, and @unintercalate x
---   . intercalate x@ is the identity on lists none of whose elements
---   contain @x@ as an infix.
+--   . intercalate x@ is the identity on nonempty lists none of whose
+--   elements contain @x@ as an infix.  Additionally, @unintercalate x
+--   . intercalate x@ is idempotent.
 unintercalate :: Eq a => [a] -> [a] -> [[a]]
-unintercalate = endBy
+unintercalate = sepBy
 
 -- * Other splitting methods
 
 -- | @splitEvery n@ splits a list into length-n pieces.  The last
 --   piece will be shorter if @n@ does not evenly divide the length of
---   the list.
+--   the list.  If @n <= 0@, @splitEvery n l@ returns an infinite list
+--   of empty lists.
 splitEvery :: Int -> [e] -> [[e]]
 splitEvery i ls = map (take i) (build (splitter ls)) where
   splitter [] _ n = n

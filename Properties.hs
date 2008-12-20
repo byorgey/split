@@ -64,7 +64,8 @@ main = do
     isSuccess (Success{}) = True
     isSuccess _ = False
     qc x = quickCheckWithResult (stdArgs { maxSuccess = 200 }) x
-    tests = [ ("default/id",                    qc prop_default_id)
+    tests = [
+        {-      ("default/id",                    qc prop_default_id)
             , ("match/decompose",               qc prop_match_decompose)
             , ("match/yields delim",            qc prop_match_yields_delim)
             , ("splitInternal/lossless",        qc prop_splitInternal_lossless)
@@ -97,6 +98,10 @@ main = do
             , ("endsWithOneOf", qc prop_endsWithOneOf)
             , ("unintercalate/right inv", qc prop_unintercalate_right_inv)
             , ("unintercalate/left inv", qc prop_unintercalate_left_inv)
+            , ("unintercalate/idem", qc prop_unintercalate_intercalate_idem)
+            , -} ("splitEvery/all n", qc prop_splitEvery_all_n)
+            , ("splitEvery/last <= n", qc prop_splitEvery_last_less_n)
+            , ("splitEvery/preserve", qc prop_splitEvery_preserve)
             ]
 
 -- The default splitting strategy is the identity.
@@ -234,13 +239,25 @@ prop_endsWith s (NonEmpty l) = all (s `isSuffixOf`) (init $ split (endsWith s) l
 prop_endsWithOneOf :: [Elt] -> NonEmptyList Elt -> Bool
 prop_endsWithOneOf elts (NonEmpty l) = all ((`elem` elts) . last) (init $ split (endsWithOneOf elts) l)
 
--- XXX fix these!
 prop_unintercalate_right_inv :: [Elt] -> [Elt] -> Bool
 prop_unintercalate_right_inv x l = intercalate x (unintercalate x l) == l
 
-prop_unintercalate_left_inv :: [Elt] -> [[Elt]] -> Property
-prop_unintercalate_left_inv x ls = not (any (x `isInfixOf`) ls) ==>
-                                     unintercalate x (intercalate x ls) == ls
+prop_unintercalate_left_inv :: [Elt] -> NonEmptyList [Elt] -> Property
+prop_unintercalate_left_inv x (NonEmpty ls) = not (any (x `isInfixOf`) ls) ==>
+                                      unintercalate x (intercalate x ls) == ls
+
+prop_unintercalate_intercalate_idem :: [Elt] -> [[Elt]] -> Bool
+prop_unintercalate_intercalate_idem x ls = f (f ls) == f ls
+  where f = unintercalate x . intercalate x
+
+prop_splitEvery_all_n :: Positive Int -> NonEmptyList Elt -> Bool
+prop_splitEvery_all_n (Positive n) (NonEmpty l) = all ((==n) . length) (init $ splitEvery n l)
+
+prop_splitEvery_last_less_n :: Positive Int -> NonEmptyList Elt -> Bool
+prop_splitEvery_last_less_n (Positive n) (NonEmpty l) = (<=n) . length . last $ splitEvery n l
+
+prop_splitEvery_preserve :: Positive Int -> [Elt] -> Bool
+prop_splitEvery_preserve (Positive n) l = concat (splitEvery n l) == l
 
 {-
 -- | split at regular intervals
