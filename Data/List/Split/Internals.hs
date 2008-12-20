@@ -393,14 +393,6 @@ endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 unintercalate :: Eq a => [a] -> [a] -> [[a]]
 unintercalate = endBy
 
--- | \"Explode\" a list into a list of singletons.  Equivalent to
---   @split . dropDelims . dropBlanks . onSublist []@.
---
--- XXX add more explanation somewhere else (in onSublist comments?)
--- is there a better way to do this?  Eq constraint is annoying.
-explode :: Eq a => [a] -> [[a]]
-explode = split . dropDelims . dropBlanks $ onSublist []
-
 -- * Other splitting methods
 
 -- | @splitEvery n@ splits a list into length-n pieces.  The last
@@ -414,6 +406,13 @@ splitEvery i ls = map (take i) (build (splitter ls)) where
 -- | A common synonym for @splitEvery@.
 chunk :: Int -> [e] -> [[e]]
 chunk = splitEvery
+
+-- | \"Explode\" a list into a list of singletons.  Equivalent to
+--   @splitEvery 1@. Also essentially equivalent to @split
+--   . dropDelims . dropBlanks . onSublist []@, although 'onSublist'
+--   forces an Eq constraint.
+explode :: [a] -> [[a]]
+explode = splitEvery 1
 
 -- | Split a list into chunks of the given lengths. For example:
 --
