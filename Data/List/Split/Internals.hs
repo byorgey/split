@@ -323,8 +323,9 @@ startsWith :: Eq a => [a] -> Splitter a
 startsWith = dropInitBlank . keepDelimsL . onSublist
 
 -- | Make a strategy that splits a list into chunks that all start
---   with one of the given elements.  Equivalent to @dropInitBlank
---   . keepDelimsL . oneOf@.  For example:
+--   with one of the given elements (except possibly the first).
+--   Equivalent to @dropInitBlank . keepDelimsL . oneOf@.  For
+--   example:
 --
 -- > split (startsWithOneOf ['A'..'Z']) "ACamelCaseIdentifier" == ["A","Camel","Case","Identifier"]
 startsWithOneOf :: Eq a => [a] -> Splitter a
