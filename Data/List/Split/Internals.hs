@@ -247,6 +247,16 @@ oneOf elts = defaultSplitter { delimiter = DelimEltPred (`elem` elts) }
 --   encountered as an exact subsequence.  For example:
 --
 -- > split (onSublist "xyz") "aazbxyzcxd" == ["aazb","xyz","cxd"]
+--
+--   Note that splitting on the empty list is a special case, which
+--   splits just before every element of the list being split.  For example:
+--
+-- > split (onSublist "") "abc" == ["","","a","","b","","c"]
+-- > split (dropDelims . dropBlanks $ onSublist "") "abc" == ["a","b","c"]
+--
+--   However, if you want to break a list into singleton elements like
+--   this, you are better off using 'splitEvery' 1, or better yet,
+--   @map (:[])@.
 onSublist :: Eq a => [a] -> Splitter a
 onSublist lst = defaultSplitter { delimiter = DelimSublist lst }
 
@@ -356,16 +366,24 @@ endsWithOneOf = dropFinalBlank . keepDelimsR . oneOf
 --   the final output, since that is a more common use case even
 --   though it is not the default.
 
--- | Split on any of the given elements.  Equivalent to @split . dropDelims . oneOf@.
+-- | Split on any of the given elements.  Equivalent to @'split'
+--   . 'dropDelims' . 'oneOf'@.  For example:
+--
+-- > splitOneOf ";.," "foo,bar;baz.glurk" == ["foo","bar","baz","glurk"]
 splitOneOf :: Eq a => [a] -> [a] -> [[a]]
 splitOneOf = split . dropDelims . oneOf
 
--- | Split on the given sublist.  Equivalent to @split . dropDelims . onSublist@.
+-- | Split on the given sublist.  Equivalent to @'split'
+--   . 'dropDelims' . 'onSublist'@.  For example:
+--
+-- > splitOn ".." "a..b...c....d.." == ["a","b",".c","","d",""]
 splitOn :: Eq a => [a] -> [a] -> [[a]]
 splitOn   = split . dropDelims . onSublist
 
 -- | Split on elements satisfying the given predicate.  Equivalent to
---   @split . dropDelims . whenElt@.
+--   @'split' . 'dropDelims' . 'whenElt'@.  For example:
+--
+-- > splitWhen (<0) [1,3,-4,5,7,-9,0,2] == [[1,3],[5,7],[0,2]]
 splitWhen :: (a -> Bool) -> [a] -> [[a]]
 splitWhen = split . dropDelims . whenElt
 
@@ -378,16 +396,24 @@ sepByOneOf :: Eq a => [a] -> [a] -> [[a]]
 sepByOneOf = splitOneOf
 
 -- | Split into chunks terminated by the given subsequence.
---   Equivalent to @split . dropFinalBlank . dropDelims . onSublist@.
+--   Equivalent to @'split' . 'dropFinalBlank' . 'dropDelims'
+--   . 'onSublist'@.  For example:
+--
+-- > endBy ";" "foo;bar;baz;" == ["foo","bar","baz"]
+--
+--   Note also that the 'lines' function from Data.List is equivalent
+--   to @endBy "\n"@.
 endBy :: Eq a => [a] -> [a] -> [[a]]
 endBy = split . dropFinalBlank . dropDelims . onSublist
 
 -- | Split into chunks terminated by one of the given elements.
---   Equivalent to @split . dropFinalBlank . dropDelims . oneOf@.
+--   Equivalent to @'split' . 'dropFinalBlank' . 'dropDelims' . 'oneOf'@.
 endByOneOf :: Eq a => [a] -> [a] -> [[a]]
 endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 
--- | A synonym for 'sepBy'.  Note that this is the right inverse of
+-- | A synonym for 'sepBy'.
+--
+--   Note that this is the right inverse of
 --   the 'intercalate' function from "Data.List", that is,
 --   @intercalate x . unintercalate x == id@.  It is also the case
 --   that @unintercalate x . intercalate x@ is idempotent.
