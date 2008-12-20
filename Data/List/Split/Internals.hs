@@ -440,13 +440,6 @@ splitEvery i ls = map (take i) (build (splitter ls)) where
 chunk :: Int -> [e] -> [[e]]
 chunk = splitEvery
 
--- | \"Explode\" a list into a list of singletons.  Equivalent to
---   @splitEvery 1@. Also essentially equivalent to @split
---   . dropDelims . dropBlanks . onSublist []@, although 'onSublist'
---   forces an Eq constraint.
-explode :: [a] -> [[a]]
-explode = splitEvery 1
-
 -- | Split a list into chunks of the given lengths. For example:
 --
 -- > splitPlaces [2,3,4] [1..20] == [[1,2],[3,4,5],[6,7,8,9]]
