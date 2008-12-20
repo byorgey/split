@@ -99,27 +99,27 @@ main = do
 prop_default_id :: [Elt] -> Bool
 prop_default_id l = split defaultSplitter l == [l]
 
-prop_match_decompose :: Blind (Delimiter Elt) -> [Elt] -> Bool
-prop_match_decompose (Blind d) l = maybe True ((==l) . uncurry (++)) $ matchDelim d l
+prop_match_decompose :: Delimiter Elt -> [Elt] -> Bool
+prop_match_decompose d l = maybe True ((==l) . uncurry (++)) $ matchDelim d l
 
 isDelimMatch :: Delimiter Elt -> [Elt] -> Bool
 isDelimMatch d l = matchDelim d l == Just (l,[])
 
-prop_match_yields_delim :: Blind (Delimiter Elt) -> [Elt] -> Bool
-prop_match_yields_delim (Blind d) l =
+prop_match_yields_delim :: Delimiter Elt -> [Elt] -> Bool
+prop_match_yields_delim d l =
     case matchDelim d l of
       Nothing -> True
       Just (del,rest) -> isDelimMatch d del
 
-prop_splitInternal_lossless :: Blind (Delimiter Elt) -> [Elt] -> Bool
-prop_splitInternal_lossless (Blind d) l = concatMap fromElem (splitInternal d l) == l
+prop_splitInternal_lossless :: Delimiter Elt -> [Elt] -> Bool
+prop_splitInternal_lossless d l = concatMap fromElem (splitInternal d l) == l
 
-prop_splitInternal_yields_delims :: Blind (Delimiter Elt) -> [Elt] -> Bool
-prop_splitInternal_yields_delims (Blind d) l =
+prop_splitInternal_yields_delims :: Delimiter Elt -> [Elt] -> Bool
+prop_splitInternal_yields_delims d l =
     all (isDelimMatch d) $ [ del | (Delim del) <- splitInternal d l ]
 
-prop_splitInternal_text_not_delims :: Blind (Delimiter Elt) -> [Elt] -> Bool
-prop_splitInternal_text_not_delims (Blind d) l =
+prop_splitInternal_text_not_delims :: Delimiter Elt -> [Elt] -> Bool
+prop_splitInternal_text_not_delims d l =
     all (not . isDelimMatch d) $ [ ch | (Text ch) <- splitInternal d l ]
 
 noConsecDelims :: SplitList Elt -> Bool
@@ -168,42 +168,42 @@ prop_onSublist_not_text sub l =
     (not . null $ sub) ==>
       all (not . isInfixOf sub) $ getTexts (onSublist sub) l
 
-prop_whenElt :: Blind (Elt -> Bool) -> [Elt] -> Bool
-prop_whenElt (Blind p) l = all ((==1) . length) ds && all (p . head) ds
+prop_whenElt :: (Elt -> Bool) -> [Elt] -> Bool
+prop_whenElt p l = all ((==1) . length) ds && all (p . head) ds
   where ds = getDelims (whenElt p) l
 
-prop_whenElt_not_text :: Blind (Elt -> Bool) -> [Elt] -> Bool
-prop_whenElt_not_text (Blind p) l = all (not . p) (concat cs)
+prop_whenElt_not_text :: (Elt -> Bool) -> [Elt] -> Bool
+prop_whenElt_not_text p l = all (not . p) (concat cs)
   where cs = getTexts (whenElt p) l
 
 process :: Splitter Elt -> [Elt] -> SplitList Elt
 process s = postProcess s . splitInternal (delimiter s)
 
-prop_dropDelims :: Blind (Splitter Elt) -> [Elt] -> Bool
-prop_dropDelims (Blind s) l = all (not . isDelim) (process (dropDelims s) l)
+prop_dropDelims :: Splitter Elt -> [Elt] -> Bool
+prop_dropDelims s l = all (not . isDelim) (process (dropDelims s) l)
 
-prop_keepDelimsL_no_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
-prop_keepDelimsL_no_delims (Blind s) l = all (not . isDelim) (process (keepDelimsL s) l)
+prop_keepDelimsL_no_delims :: Splitter Elt -> [Elt] -> Bool
+prop_keepDelimsL_no_delims s l = all (not . isDelim) (process (keepDelimsL s) l)
 
-prop_keepDelimsL_match :: Blind (Splitter Elt) -> NonEmptyList Elt -> Bool
-prop_keepDelimsL_match (Blind s) (NonEmpty l) =
+prop_keepDelimsL_match :: Splitter Elt -> NonEmptyList Elt -> Bool
+prop_keepDelimsL_match s (NonEmpty l) =
   all (isJust . matchDelim (delimiter s)) [ c | Text c <- tail p ]
     where p = process (keepDelimsL s) l
 
-prop_keepDelimsR_no_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
-prop_keepDelimsR_no_delims (Blind s) l = all (not . isDelim) (process (keepDelimsR s) l)
+prop_keepDelimsR_no_delims :: Splitter Elt -> [Elt] -> Bool
+prop_keepDelimsR_no_delims s l = all (not . isDelim) (process (keepDelimsR s) l)
 
-prop_keepDelimsR_match :: Blind (Splitter Elt) -> NonEmptyList Elt -> Bool
-prop_keepDelimsR_match (Blind s) (NonEmpty l) =
+prop_keepDelimsR_match :: Splitter Elt -> NonEmptyList Elt -> Bool
+prop_keepDelimsR_match s (NonEmpty l) =
   all (any (isJust . matchDelim (delimiter s)) . tails)
     [ c | Text c <- init p ]
       where p = process (keepDelimsR s) l
 
-prop_condense_no_consec_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
-prop_condense_no_consec_delims (Blind s) l = noConsecDelims $ process (condense s) l
+prop_condense_no_consec_delims :: Splitter Elt -> [Elt] -> Bool
+prop_condense_no_consec_delims s l = noConsecDelims $ process (condense s) l
 
-prop_condense_all_delims :: Blind (Splitter Elt) -> [Elt] -> Bool
-prop_condense_all_delims (Blind s) l = all allDelims p
+prop_condense_all_delims :: Splitter Elt -> [Elt] -> Bool
+prop_condense_all_delims s l = all allDelims p
   where p = [ d | Delim d <- process (condense s) l ]
         allDelims t = all isDelim (splitInternal (delimiter s) t)
 
