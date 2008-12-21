@@ -42,19 +42,17 @@ data Splitter a = Splitter { delimiter        :: Delimiter a
 --   delimiters into one, keep initial and final blank chunks.
 --   Default delimiter is the constantly false predicate.
 --
+--   Note that 'defaultSplitter' should normally not be used; use
+--   'oneOf', 'onSublist', or 'whenElt' instead, which are the same as
+--   the 'defaultSplitter' with just the delimiter overridden.
+--
 --   The 'defaultSplitter' strategy with any delimiter gives a
 --   maximally information-preserving splitting strategy, in the sense
 --   that (a) taking the 'concat' of the output yields the original
 --   list, and (b) given only the output list, we can reconstruct a
 --   'Splitter' which would produce the same output list again given
---   the original input list.
---
---   This default strategy can be overridden to allow discarding
---   various sorts of information.
---
---   Note that 'defaultSplitter' should normally not be used; use
---   'oneOf', 'onSublist', or 'whenElt' instead (which are the same as
---   the 'defaultSplitter' with just the delimiter overridden).
+--   the original input list.  This default strategy can be overridden
+--   to allow discarding various sorts of information.
 defaultSplitter :: Splitter a
 defaultSplitter = Splitter { delimiter        = DelimEltPred (const False)
                            , delimPolicy      = Keep
@@ -176,7 +174,7 @@ doCondense Condense ls = condense' ls
           where (ds,rest) = span isDelim l
 
 -- | Insert blank chunks between any remaining consecutive delimiters,
---   and at the beginning/end if the first/last element is a
+--   and at the beginning or end if the first or last element is a
 --   delimiter.
 insertBlanks :: SplitList a -> SplitList a
 insertBlanks [] = [Text []]
@@ -411,7 +409,7 @@ endBy = split . dropFinalBlank . dropDelims . onSublist
 endByOneOf :: Eq a => [a] -> [a] -> [[a]]
 endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 
--- | A synonym for 'sepBy'/'splitOn'.
+-- | A synonym for 'sepBy' \/ 'splitOn'.
 --
 --   Note that this is the right inverse of the 'intercalate' function
 --   from "Data.List", that is, @'intercalate' x . 'unintercalate' x
