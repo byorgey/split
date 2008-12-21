@@ -22,4 +22,4 @@ library
   if flag(testing)
     ghc-options: -Werror
   Build-Depends:     base
-  Exposed-Modules:   Data.List.Split
+  Exposed-Modules:   Data.List.Split, Data.List.Split.Internals
