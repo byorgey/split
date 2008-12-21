@@ -52,7 +52,7 @@ data Splitter a = Splitter { delimiter        :: Delimiter a
 --   This default strategy can be overridden to allow discarding
 --   various sorts of information.
 --
---   Note that 'defaultSplitter' should usually not be used; use
+--   Note that 'defaultSplitter' should normally not be used; use
 --   'oneOf', 'onSublist', or 'whenElt' instead (which are the same as
 --   the 'defaultSplitter' with just the delimiter overridden).
 defaultSplitter :: Splitter a
@@ -136,8 +136,8 @@ build g = g (:) []
 
 -- | Given a delimiter to use, split a list into an internal
 --   representation with chunks tagged as delimiters or text.  This
---   transformation is lossless; in particular, @concatMap fromElem
---   (splitInternal d l) == l@.
+--   transformation is lossless; in particular, @'concatMap' 'fromElem'
+--   ('splitInternal' d l) == l@.
 splitInternal :: Delimiter a -> [a] -> SplitList a
 splitInternal _ [] = []
 splitInternal d xxs@(x:xs) = case matchDelim d xxs of
@@ -255,8 +255,8 @@ oneOf elts = defaultSplitter { delimiter = DelimEltPred (`elem` elts) }
 -- > split (dropDelims . dropBlanks $ onSublist "") "abc" == ["a","b","c"]
 --
 --   However, if you want to break a list into singleton elements like
---   this, you are better off using 'splitEvery' 1, or better yet,
---   @map (:[])@.
+--   this, you are better off using @'splitEvery' 1@, or better yet,
+--   @'map' (:[])@.
 onSublist :: Eq a => [a] -> Splitter a
 onSublist lst = defaultSplitter { delimiter = DelimSublist lst }
 
@@ -318,7 +318,7 @@ dropFinalBlank s = s { finalBlankPolicy = DropBlank }
 -- ** Derived combinators
 
 -- | Drop all blank chunks from the output.  Equivalent to
---   @dropInitBlank . dropFinalBlank . condense@.  For example:
+--   @'dropInitBlank' . 'dropFinalBlank' . 'condense'@.  For example:
 --
 -- > split (oneOf ":") "::b:::a" == ["",":","",":","b",":","",":","",":","a"]
 -- > split (dropBlanks $ oneOf ":") "::b:::a" == ["::","b",":::","a"]
@@ -327,8 +327,8 @@ dropBlanks = dropInitBlank . dropFinalBlank . condense
 
 -- | Make a strategy that splits a list into chunks that all start
 --   with the given subsequence (except possibly the first).
---   Equivalent to @dropInitBlank . keepDelimsL . onSublist@.  For
---   example:
+--   Equivalent to @'dropInitBlank' . 'keepDelimsL' . 'onSublist'@.
+--   For example:
 --
 -- > split (startsWith "app") "applyappicativeapplaudapproachapple" == ["apply","appicative","applaud","approach","apple"]
 startsWith :: Eq a => [a] -> Splitter a
@@ -336,7 +336,7 @@ startsWith = dropInitBlank . keepDelimsL . onSublist
 
 -- | Make a strategy that splits a list into chunks that all start
 --   with one of the given elements (except possibly the first).
---   Equivalent to @dropInitBlank . keepDelimsL . oneOf@.  For
+--   Equivalent to @'dropInitBlank' . 'keepDelimsL' . 'oneOf'@.  For
 --   example:
 --
 -- > split (startsWithOneOf ['A'..'Z']) "ACamelCaseIdentifier" == ["A","Camel","Case","Identifier"]
@@ -345,7 +345,7 @@ startsWithOneOf = dropInitBlank . keepDelimsL . oneOf
 
 -- | Make a strategy that splits a list into chunks that all end with
 --   the given subsequence, except possibly the last.  Equivalent to
---   @dropFinalBlank . keepDelimsR . onSublist@.  For example:
+--   @'dropFinalBlank' . 'keepDelimsR' . 'onSublist'@.  For example:
 --
 -- > split (endsWith "ly") "happilyslowlygnarlylily" == ["happily","slowly","gnarly","lily"]
 endsWith :: Eq a => [a] -> Splitter a
@@ -353,7 +353,7 @@ endsWith = dropFinalBlank . keepDelimsR . onSublist
 
 -- | Make a strategy that splits a list into chunks that all end with
 --   one of the given elements, except possibly the last.  Equivalent
---   to @dropFinalBlank . keepDelimsR . oneOf@.  For example:
+--   to @'dropFinalBlank' . 'keepDelimsR' . 'oneOf'@.  For example:
 --
 -- > split (condense $ endsWithOneOf ".,?! ") "Hi, there!  How are you?" == ["Hi, ","there!  ","How ","are ","you?"]
 endsWithOneOf :: Eq a => [a] -> Splitter a
@@ -361,10 +361,10 @@ endsWithOneOf = dropFinalBlank . keepDelimsR . oneOf
 
 -- ** Convenience functions
 --
--- $ These functions implement some common splitting strategies.  Note
---   that all of the functions in this section drop delimiters from
---   the final output, since that is a more common use case even
---   though it is not the default.
+-- These functions implement some common splitting strategies.  Note
+-- that all of the functions in this section drop delimiters from
+-- the final output, since that is a more common use case even
+-- though it is not the default.
 
 -- | Split on any of the given elements.  Equivalent to @'split'
 --   . 'dropDelims' . 'oneOf'@.  For example:
@@ -401,8 +401,8 @@ sepByOneOf = splitOneOf
 --
 -- > endBy ";" "foo;bar;baz;" == ["foo","bar","baz"]
 --
---   Note also that the 'lines' function from Data.List is equivalent
---   to @endBy "\n"@.
+--   Note also that the 'lines' function from "Data.List" is equivalent
+--   to @'endBy' \"\\n\"@.
 endBy :: Eq a => [a] -> [a] -> [[a]]
 endBy = split . dropFinalBlank . dropDelims . onSublist
 
@@ -411,32 +411,32 @@ endBy = split . dropFinalBlank . dropDelims . onSublist
 endByOneOf :: Eq a => [a] -> [a] -> [[a]]
 endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 
--- | A synonym for 'sepBy'.
+-- | A synonym for 'sepBy'/'splitOn'.
 --
---   Note that this is the right inverse of
---   the 'intercalate' function from "Data.List", that is,
---   @intercalate x . unintercalate x == id@.  It is also the case
---   that @unintercalate x . intercalate x@ is idempotent.
---   @unintercalate x . intercalate x@ is the identity on certain
---   lists, but it is tricky to state the precise conditions under
---   which this holds.  (For example, it is not enough to say that @x@
---   does not occur in any elements of the input list.  Working out
---   why is left as an exercise for the reader.
+--   Note that this is the right inverse of the 'intercalate' function
+--   from "Data.List", that is, @'intercalate' x . 'unintercalate' x
+--   == 'id'@.  It is also the case that @'unintercalate' x
+--   . 'intercalate' x@ is idempotent.  @'unintercalate' x
+--   . 'intercalate' x@ is the identity on certain lists, but it is
+--   tricky to state the precise conditions under which this holds.
+--   (For example, it is not enough to say that @x@ does not occur in
+--   any elements of the input list.  Working out why is left as an
+--   exercise for the reader.)
 unintercalate :: Eq a => [a] -> [a] -> [[a]]
 unintercalate = sepBy
 
 -- * Other splitting methods
 
--- | @splitEvery n@ splits a list into length-n pieces.  The last
+-- | @'splitEvery' n@ splits a list into length-n pieces.  The last
 --   piece will be shorter if @n@ does not evenly divide the length of
---   the list.  If @n <= 0@, @splitEvery n l@ returns an infinite list
+--   the list.  If @n <= 0@, @'splitEvery' n l@ returns an infinite list
 --   of empty lists.
 splitEvery :: Int -> [e] -> [[e]]
 splitEvery i ls = map (take i) (build (splitter ls)) where
   splitter [] _ n = n
   splitter l c n  = l `c` splitter (drop i l) c n
 
--- | A common synonym for @splitEvery@.
+-- | A common synonym for 'splitEvery'.
 chunk :: Int -> [e] -> [[e]]
 chunk = splitEvery
 
@@ -445,8 +445,8 @@ chunk = splitEvery
 -- > splitPlaces [2,3,4] [1..20] == [[1,2],[3,4,5],[6,7,8,9]]
 -- > splitPlaces [4,9] [1..10] == [[1,2,3,4],[5,6,7,8,9,10]]
 --
---   The behavior of @splitPlaces ls xs@ when @sum ls /= length xs@ can
---   be inferred from the above examples and the fact that @splitPlaces@
+--   The behavior of @'splitPlaces' ls xs@ when @'sum' ls /= 'length' xs@ can
+--   be inferred from the above examples and the fact that 'splitPlaces'
 --   is total.
 splitPlaces :: Integral a => [a] -> [e] -> [[e]]
 splitPlaces is ys = build (splitPlacer is ys) where
