@@ -18,8 +18,6 @@ flag testing
   default: False
 
 library
-  ghc-options:         -Wall
-  if flag(testing)
-    ghc-options: -Werror
+  ghc-options:       -Wall
   Build-Depends:     base
   Exposed-Modules:   Data.List.Split, Data.List.Split.Internals
