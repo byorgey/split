@@ -1,0 +1,27 @@
+I am pleased to announce the release of Data.List.Split, which
+provides a wide range of strategies and a unified combinator framework
+for splitting lists with respect to some sort of delimiter.  It
+strives to be flexible yet simple.  If you've ever wished there was a
+simple 'split' function you could grab from Data.List, this is the
+package for you---no matter which of the seventeen* slightly different
+ways to split a list you actually need!  Just use one of the
+prepackaged splitting strategies, or build your own with the
+combinator library.
+
+Get it from Hackage:
+
+  cabal install split
+
+Get the source:
+
+  darcs get http://code.haskell.org/~byorgey/code/split
+
+Get excited:
+
+  http://byorgey.wordpress.com/ ...
+
+Get splitting!
+
+-Brent
+
+* Actual number may vary.
