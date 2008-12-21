@@ -12,6 +12,9 @@ Dependencies:
   will likely work with older versions of GHC and other Haskell
   compilers as well.
 
+  The Properties.hs file depends on QuickCheck >= 2.1, but you don't
+  need it in order to build the library.
+
 
 Build with Cabal:
 

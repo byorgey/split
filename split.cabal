@@ -6,7 +6,7 @@ Homepage:            http://code.haskell.org/~byorgey/code/split
 Synopsis:            Combinator library for splitting lists.
 License:             BSD3
 License-file:        LICENSE
-Extra-source-files:  README
+Extra-source-files:  README, Properties.hs
 Author:              Brent Yorgey
 Maintainer:          byorgey@cis.upenn.edu
 Category:            List
@@ -21,5 +21,5 @@ library
   ghc-options:         -Wall
   if flag(testing)
     ghc-options: -Werror
-  Build-Depends:     base, QuickCheck
+  Build-Depends:     base
   Exposed-Modules:   Data.List.Split
