@@ -60,9 +60,8 @@ module Data.List.Split (
                        , whenElt
 
                        -- ** Strategy transformers
-                       --
-                       -- $ Functions for altering splitting strategy
-                       --   parameters.
+                       -- $transform
+
                        , dropDelims
                        , keepDelimsL
                        , keepDelimsR
@@ -71,10 +70,8 @@ module Data.List.Split (
                        , dropFinalBlank
 
                        -- ** Derived combinators
-                       --
-                       -- $ Combinators which can be defined in terms of
-                       --   other combinators, but are provided for
-                       --   convenience.
+                       -- $derived
+
                        , dropBlanks
                        , startsWith
                        , startsWithOneOf
@@ -139,3 +136,9 @@ import Data.List.Split.Internals
 -- All these basic strategies have the same parameters as the
 -- 'defaultSplitter' except for the delimiter.
 
+-- $transform
+-- Functions for altering splitting strategy parameters.
+
+-- $derived
+-- Combinators which can be defined in terms of other combinators, but
+-- are provided for convenience.
