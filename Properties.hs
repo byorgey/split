@@ -105,6 +105,8 @@ main = do
             , ("splitPlaces/last <= n",         qc prop_splitPlaces_last_less_n)
             , ("splitPlaces/preserve",          qc prop_splitPlaces_preserve)
             , ("lines",                         qc prop_lines)
+            , ("wordsBy/words",                 qc prop_wordsBy_words)
+            , ("linesBy/lines",                 qc prop_linesBy_lines)
             ]
 
 prop_default_id :: [Elt] -> Bool
@@ -291,12 +293,20 @@ mInit [] = []
 mInit [x] = []
 mInit (x:xs) = x : init xs
 
-newtype EltNL = EltNL { unEltNL :: Char }
+newtype EltWS = EltWS { unEltWS :: Char }
   deriving (Eq, Show)
 
-instance Arbitrary EltNL where
-  arbitrary = elements (map EltNL "abcde\n")
+instance Arbitrary EltWS where
+  arbitrary = elements (map EltWS "abcde \n")
 
-prop_lines :: [EltNL] -> Bool
+prop_lines :: [EltWS] -> Bool
 prop_lines s = lines s' == endBy "\n" s'
-  where s' = map unEltNL s
+  where s' = map unEltWS s
+
+prop_wordsBy_words :: [EltWS] -> Bool
+prop_wordsBy_words s = words s' == wordsBy isSpace s'
+  where s' = map unEltWS s
+
+prop_linesBy_lines :: [EltWS] -> Bool
+prop_linesBy_lines s = lines s' == linesBy (=='\n') s'
+  where s' = map unEltWS s

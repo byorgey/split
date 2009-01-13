@@ -28,7 +28,6 @@ module Data.List.Split (
                        -- * Convenience functions
                        -- $conv
 
-
                          splitOn
                        , splitOneOf
                        , splitWhen
@@ -38,6 +37,9 @@ module Data.List.Split (
                        , endByOneOf
 
                        , unintercalate
+
+                       , wordsBy
+                       , linesBy
 
                        -- * Other splitting methods
                        -- $other

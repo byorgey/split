@@ -423,6 +423,22 @@ endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 unintercalate :: Eq a => [a] -> [a] -> [[a]]
 unintercalate = sepBy
 
+-- | Split into words, with word boundaries indicated by the given
+--   predicate.  Satisfies @words === wordsBy isSpace@; equivalent to
+--   @split . dropBlanks . dropDelims . whenElt@.  For example:
+--
+-- > wordsBy (=='x') "dogxxxcatxbirdxx" == ["dog","cat","bird"]
+wordsBy :: (a -> Bool) -> [a] -> [[a]]
+wordsBy = split . dropBlanks . dropDelims . whenElt
+
+-- | Split into lines, with line boundaries indicated by the given
+--   predicate. Satisfies @lines === linesBy (=='\n')@; equivalent to
+--   @split . dropFinalBlank . dropDelims . whenElt@.  For example:
+--
+-- > linesBy (=='x') "dogxxxcatxbirdxx" == ["dog","","","cat","bird",""]
+linesBy :: (a -> Bool) -> [a] -> [[a]]
+linesBy = split . dropFinalBlank . dropDelims . whenElt
+
 -- * Other splitting methods
 
 -- | @'splitEvery' n@ splits a list into length-n pieces.  The last
