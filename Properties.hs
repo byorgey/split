@@ -104,6 +104,7 @@ main = do
             , ("splitPlaces/lengths",           qc prop_splitPlaces_lengths)
             , ("splitPlaces/last <= n",         qc prop_splitPlaces_last_less_n)
             , ("splitPlaces/preserve",          qc prop_splitPlaces_preserve)
+            , ("splitPlaces/splitEvery",        qc prop_splitPlaces_splitEvery)
             , ("lines",                         qc prop_lines)
             , ("wordsBy/words",                 qc prop_wordsBy_words)
             , ("linesBy/lines",                 qc prop_linesBy_lines)
@@ -284,6 +285,9 @@ prop_splitPlaces_last_less_n (NonEmpty ps) (NonEmpty l) = (head $ drop (length l
 prop_splitPlaces_preserve :: [NonNegative Integer] -> [Elt] -> Bool
 prop_splitPlaces_preserve ps l = concat (splitPlaces ps' l) == genericTake (sum ps') l
   where ps' = map unNN ps
+
+prop_splitPlaces_splitEvery :: Positive Int -> [Elt] -> Bool
+prop_splitPlaces_splitEvery (Positive n) l = splitPlaces (repeat n) l == splitEvery n l
 
 unNN :: NonNegative a -> a
 unNN (NonNegative x) = x

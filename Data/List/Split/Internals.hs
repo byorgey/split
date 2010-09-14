@@ -445,6 +445,14 @@ linesBy = split . dropFinalBlank . dropDelims . whenElt
 --   piece will be shorter if @n@ does not evenly divide the length of
 --   the list.  If @n <= 0@, @'splitEvery' n l@ returns an infinite list
 --   of empty lists.
+--
+--   Note that @'splitEvery' n []@ is @[]@, not @[[]]@.  This is
+--   intentional, and is consistent with a recursive definition of
+--   'splitEvery'; it satisfies the property that
+--
+--   @splitEvery n xs ++ splitEvery n ys == splitEvery n (xs ++ ys)@
+--
+--   whenever @n@ evenly divides the length of @xs@.
 splitEvery :: Int -> [e] -> [[e]]
 splitEvery i ls = map (take i) (build (splitter ls)) where
   splitter [] _ n = n
