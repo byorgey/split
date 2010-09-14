@@ -215,11 +215,12 @@ dropInitial _ l = l
 
 -- | Drop a final blank chunk according to the given 'EndPolicy'.
 dropFinal :: EndPolicy -> SplitList a -> SplitList a
-dropFinal _ [] = []
-dropFinal DropBlank l = case last l of
-                          Text [] -> init l
-                          _ -> l
-dropFinal _ l = l
+dropFinal _         [] = []
+dropFinal DropBlank l  = dropFinal' l
+  where dropFinal' []        = []
+        dropFinal' [Text []] = []
+        dropFinal' (x:xs)    = x:dropFinal' xs
+dropFinal _         l  = l
 
 -- * Combinators
 
