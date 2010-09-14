@@ -1,5 +1,5 @@
 Name:                split
-Version:             0.1.1
+Version:             0.1.2
 Stability:           experimental
 Description:         Combinator library and utility functions for splitting lists.
 Homepage:            http://code.haskell.org/~byorgey/code/split
@@ -19,5 +19,5 @@ flag testing
 
 library
   ghc-options:       -Wall
-  Build-Depends:     base
+  Build-Depends:     base <5
   Exposed-Modules:   Data.List.Split, Data.List.Split.Internals
