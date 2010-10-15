@@ -329,7 +329,7 @@ dropBlanks = dropInitBlank . dropFinalBlank . condense
 --   Equivalent to @'dropInitBlank' . 'keepDelimsL' . 'onSublist'@.
 --   For example:
 --
--- > split (startsWith "app") "applyappicativeapplaudapproachapple" == ["apply","appicative","applaud","approach","apple"]
+-- > split (startsWith "app") "applyapplicativeapplaudapproachapple" == ["apply","applicative","applaud","approach","apple"]
 startsWith :: Eq a => [a] -> Splitter a
 startsWith = dropInitBlank . keepDelimsL . onSublist
 
