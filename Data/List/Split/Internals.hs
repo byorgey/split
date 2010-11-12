@@ -138,13 +138,32 @@ build g = g (:) []
 --   ('splitInternal' d l) == l@.
 splitInternal :: Delimiter a -> [a] -> SplitList a
 splitInternal _ [] = []
-splitInternal d xxs@(x:xs) = case matchDelim d xxs of
-                               -- special case for blank delimiter
-                               Just ([], (r:rs)) -> Delim [] : Text [r] : splitInternal d rs
-                               Just (match,rest) -> Delim match : splitInternal d rest
-                               _                 -> x `consText` splitInternal d xs
-  where consText z (Text c : ys) = Text (z:c) : ys
-        consText z ys             = Text [z] : ys
+splitInternal d xxs
+  | null xs   = toSplitList match
+  | otherwise = Text xs : toSplitList match
+ where
+  (xs,match) = breakDelim d xxs
+
+  toSplitList Nothing             = []
+  toSplitList (Just ([],r:rs))    = Delim [] : Text [r] : splitInternal d rs
+  toSplitList (Just (delim,rest)) = Delim delim : splitInternal d rest
+
+breakDelim :: Delimiter a -> [a] -> ([a],Maybe ([a],[a]))
+breakDelim d@(DelimEltPred p) (x:xs)
+  | p x       = ([],Just ([x],xs))
+  | otherwise = let (ys,match) = breakDelim d xs in (x:ys,match)
+breakDelim (DelimEltPred _) []  = ([],Nothing)
+breakDelim (DelimSublist []) xs = ([],Just ([],xs))
+breakDelim (DelimSublist _)  [] = ([],Nothing)
+breakDelim (DelimSublist ds) xxs@(x:xs) =
+  case matchSublist ds xxs of
+      Nothing   -> let (ys,match) = breakDelim (DelimSublist ds) xs in (x:ys,match)
+      Just rest -> ([],Just (ds,rest))
+
+matchSublist :: Eq a => [a] -> [a] -> Maybe [a]
+matchSublist [] xs = Just xs
+matchSublist _  [] = Nothing
+matchSublist (d:ds) (x:xs) = if d==x then matchSublist ds xs else Nothing
 
 -- | Given a split list in the internal tagged representation, produce
 --   a new internal tagged representation corresponding to the final
