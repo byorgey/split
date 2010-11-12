@@ -1,12 +1,12 @@
 Name:                split
-Version:             0.1.2.1
+Version:             0.1.2.2
 Stability:           experimental
 Description:         Combinator library and utility functions for splitting lists.
 Homepage:            http://code.haskell.org/~byorgey/code/split
 Synopsis:            Combinator library for splitting lists.
 License:             BSD3
 License-file:        LICENSE
-Extra-source-files:  README, Properties.hs
+Extra-source-files:  README, Properties.hs, CHANGES
 Author:              Brent Yorgey
 Maintainer:          byorgey@cis.upenn.edu
 Category:            List

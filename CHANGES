@@ -1,0 +1,7 @@
+* 0.1.2.2
+
+  - Fix typo in documentation (davidL)
+
+  - Lazier implementation of splitInternal from Jan Christiansen.
+    Performance on large lists with not very many split points is now
+    greatly improved.
