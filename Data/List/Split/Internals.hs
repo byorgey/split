@@ -475,6 +475,7 @@ linesBy = split . dropFinalBlank . dropDelims . whenElt
 --   whenever @n@ evenly divides the length of @xs@.
 splitEvery :: Int -> [e] -> [[e]]
 splitEvery i ls = map (take i) (build (splitter ls)) where
+  splitter :: [e] -> ([e] -> a -> a) -> a -> a
   splitter [] _ n = n
   splitter l c n  = l `c` splitter (drop i l) c n
 
@@ -492,6 +493,8 @@ chunk = splitEvery
 --   is total.
 splitPlaces :: Integral a => [a] -> [e] -> [[e]]
 splitPlaces is ys = build (splitPlacer is ys) where
+  splitPlacer :: forall i b t. Integral i
+              => [i] -> [b] -> ([b] -> t -> t) -> t -> t
   splitPlacer [] _ _ n      = n
   splitPlacer _ [] _ n      = n
   splitPlacer (l:ls) xs c n = let (x1, x2) = genericSplitAt l xs
