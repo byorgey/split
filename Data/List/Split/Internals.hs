@@ -499,3 +499,22 @@ splitPlaces is ys = build (splitPlacer is ys) where
   splitPlacer _ [] _ n      = n
   splitPlacer (l:ls) xs c n = let (x1, x2) = genericSplitAt l xs
                               in  x1 `c` splitPlacer ls x2 c n
+
+-- | A useful recursion pattern for processing a list to produce a new
+--   list, often used for \"chopping\" up the input list.  Typically
+--   chop is called with some function that will consume an initial
+--   prefix of the list and produce a value and the rest of the list.
+--
+--   For example, many common Prelude functions can be implemented in
+--   terms of @chop@:
+--
+-- > group :: (Eq a) => [a] -> [[a]]
+-- > group = chop (\ xs@(x:_) -> span (==x) xs)
+-- >
+-- > words :: String -> [String]
+-- > words = filter (not . null) . chop (span (not . isSpace) . dropWhile isSpace)
+
+chop :: ([a] -> (b, [a])) -> [a] -> [b]
+chop _ [] = []
+chop f as = b : chop f as'
+  where (b, as') = f as

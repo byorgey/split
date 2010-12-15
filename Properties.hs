@@ -9,7 +9,7 @@ import Text.Printf
 import Control.Monad
 
 import Data.Char
-import Data.List (isInfixOf, isPrefixOf, isSuffixOf, tails, intercalate, genericTake)
+import Data.List (isInfixOf, isPrefixOf, isSuffixOf, tails, intercalate, genericTake, group)
 import Data.Maybe (isJust)
 
 newtype Elt = Elt { unElt :: Char }
@@ -108,6 +108,8 @@ main = do
             , ("lines",                         qc prop_lines)
             , ("wordsBy/words",                 qc prop_wordsBy_words)
             , ("linesBy/lines",                 qc prop_linesBy_lines)
+            , ("chop/group",                    qc prop_chop_group)
+            , ("chop/words",                    qc prop_chop_words)
             ]
 
 prop_default_id :: [Elt] -> Bool
@@ -313,4 +315,11 @@ prop_wordsBy_words s = words s' == wordsBy isSpace s'
 
 prop_linesBy_lines :: [EltWS] -> Bool
 prop_linesBy_lines s = lines s' == linesBy (=='\n') s'
+  where s' = map unEltWS s
+
+prop_chop_group :: [Elt] -> Bool
+prop_chop_group s = chop (\xs@(x:_) -> span (==x) xs) s == group s
+
+prop_chop_words :: [EltWS] -> Bool
+prop_chop_words s = words s' == (filter (not . null) . chop (span (not . isSpace) . dropWhile isSpace) $ s')
   where s' = map unEltWS s
