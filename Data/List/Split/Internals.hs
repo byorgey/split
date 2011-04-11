@@ -487,6 +487,7 @@ chunk = splitEvery
 --
 -- > splitPlaces [2,3,4] [1..20] == [[1,2],[3,4,5],[6,7,8,9]]
 -- > splitPlaces [4,9] [1..10] == [[1,2,3,4],[5,6,7,8,9,10]]
+-- > splitPlaces [4,9,3] [1..10] == [[1,2,3,4],[5,6,7,8,9,10]]
 --
 --   The behavior of @'splitPlaces' ls xs@ when @'sum' ls /= 'length' xs@ can
 --   be inferred from the above examples and the fact that 'splitPlaces'
@@ -497,6 +498,21 @@ splitPlaces is ys = build (splitPlacer is ys) where
               => [i] -> [b] -> ([b] -> t -> t) -> t -> t
   splitPlacer [] _ _ n      = n
   splitPlacer _ [] _ n      = n
+  splitPlacer (l:ls) xs c n = let (x1, x2) = genericSplitAt l xs
+                              in  x1 `c` splitPlacer ls x2 c n
+
+-- | Split a list into chunks of the given lengths. Unlike 'splitPlaces', the
+-- output list will always be the same length as the first input argument. For
+-- example:
+--
+-- > splitPlacesBlanks [2,3,4] [1..20] == [[1,2],[3,4,5],[6,7,8,9]]
+-- > splitPlacesBlanks [4,9] [1..10] == [[1,2,3,4],[5,6,7,8,9,10]]
+-- > splitPlacesBlanks [4,9,3] [1..10] == [[1,2,3,4],[5,6,7,8,9,10],[]]
+splitPlacesBlanks :: Integral a => [a] -> [e] -> [[e]]
+splitPlacesBlanks is ys = build (splitPlacer is ys) where
+  splitPlacer :: forall i b t. Integral i
+              => [i] -> [b] -> ([b] -> t -> t) -> t -> t
+  splitPlacer [] _ _ n      = n
   splitPlacer (l:ls) xs c n = let (x1, x2) = genericSplitAt l xs
                               in  x1 `c` splitPlacer ls x2 c n
 

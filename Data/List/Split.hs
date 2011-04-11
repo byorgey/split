@@ -46,6 +46,7 @@ module Data.List.Split (
                        , splitEvery
                        , chunk
                        , splitPlaces
+                       , splitPlacesBlanks
                        , chop
 
                        -- * Splitting combinators
