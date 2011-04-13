@@ -1,5 +1,5 @@
 Name:                split
-Version:             0.1.3
+Version:             0.1.4
 Stability:           stable
 Description:         Combinator library and utility functions for splitting lists.
 Homepage:            http://code.haskell.org/~byorgey/code/split
