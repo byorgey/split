@@ -105,6 +105,9 @@ main = do
             , ("splitPlaces/last <= n",         qc prop_splitPlaces_last_less_n)
             , ("splitPlaces/preserve",          qc prop_splitPlaces_preserve)
             , ("splitPlaces/splitEvery",        qc prop_splitPlaces_splitEvery)
+            , ("splitPlacesB/length",           qc prop_splitPlacesB_length)
+            , ("splitPlacesB/last <= n",        qc prop_splitPlacesB_last_less_n)
+            , ("splitPlacesB/preserve",         qc prop_splitPlacesB_preserve)
             , ("lines",                         qc prop_lines)
             , ("wordsBy/words",                 qc prop_wordsBy_words)
             , ("linesBy/lines",                 qc prop_linesBy_lines)
@@ -290,6 +293,19 @@ prop_splitPlaces_preserve ps l = concat (splitPlaces ps' l) == genericTake (sum 
 
 prop_splitPlaces_splitEvery :: Positive Int -> [Elt] -> Bool
 prop_splitPlaces_splitEvery (Positive n) l = splitPlaces (repeat n) l == splitEvery n l
+
+prop_splitPlacesB_length :: [NonNegative Int] -> [Elt] -> Bool
+prop_splitPlacesB_length ps xs = length ps' == length (splitPlacesBlanks ps' xs)
+  where ps' = map unNN ps
+
+prop_splitPlacesB_last_less_n :: NonEmptyList (NonNegative Int) -> NonEmptyList Elt -> Bool
+prop_splitPlacesB_last_less_n (NonEmpty ps) (NonEmpty l) = (head $ drop (length l' - 1) ps') >= length (last l')
+  where l' = splitPlacesBlanks ps' l
+        ps' = map unNN ps
+
+prop_splitPlacesB_preserve :: [NonNegative Integer] -> [Elt] -> Bool
+prop_splitPlacesB_preserve ps l = concat (splitPlacesBlanks ps' l) == genericTake (sum ps') l
+  where ps' = map unNN ps
 
 unNN :: NonNegative a -> a
 unNN (NonNegative x) = x
