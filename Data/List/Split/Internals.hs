@@ -1,12 +1,12 @@
-{-# LANGUAGE GADTs, Rank2Types #-}
+{-# LANGUAGE GADTs #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.List.Split.Internal
 -- Copyright   :  (c) Brent Yorgey 2008
 -- License     :  BSD-style (see LICENSE)
 -- Maintainer  :  byorgey@gmail.com
--- Stability   :  experimental
--- Portability :  unportable (GADTs, Rank2Types)
+-- Stability   :  stable
+-- Portability :  GADTs
 --
 -- Implementation module for "Data.List.Split", a combinator library
 -- for splitting lists.  See the "Data.List.Split" documentation for
@@ -494,8 +494,7 @@ chunk = splitEvery
 --   is total.
 splitPlaces :: Integral a => [a] -> [e] -> [[e]]
 splitPlaces is ys = build (splitPlacer is ys) where
-  splitPlacer :: forall i b t. Integral i
-              => [i] -> [b] -> ([b] -> t -> t) -> t -> t
+  splitPlacer :: Integral i => [i] -> [b] -> ([b] -> t -> t) -> t -> t
   splitPlacer [] _ _ n      = n
   splitPlacer _ [] _ n      = n
   splitPlacer (l:ls) xs c n = let (x1, x2) = genericSplitAt l xs
@@ -510,8 +509,7 @@ splitPlaces is ys = build (splitPlacer is ys) where
 -- > splitPlacesBlanks [4,9,3] [1..10] == [[1,2,3,4],[5,6,7,8,9,10],[]]
 splitPlacesBlanks :: Integral a => [a] -> [e] -> [[e]]
 splitPlacesBlanks is ys = build (splitPlacer is ys) where
-  splitPlacer :: forall i b t. Integral i
-              => [i] -> [b] -> ([b] -> t -> t) -> t -> t
+  splitPlacer :: Integral i => [i] -> [b] -> ([b] -> t -> t) -> t -> t
   splitPlacer [] _ _ n      = n
   splitPlacer (l:ls) xs c n = let (x1, x2) = genericSplitAt l xs
                               in  x1 `c` splitPlacer ls x2 c n

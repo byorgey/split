@@ -4,8 +4,8 @@
 -- Copyright   :  (c) Brent Yorgey, Louis Wasserman 2008
 -- License     :  BSD-style (see LICENSE)
 -- Maintainer  :  Brent Yorgey <byorgey@gmail.com>
--- Stability   :  experimental
--- Portability :  unportable (GADTs, Rank2Types)
+-- Stability   :  stable
+-- Portability :  GADTs
 --
 -- The "Data.List.Split" module contains a wide range of strategies
 -- for splitting lists with respect to some sort of delimiter, mostly
