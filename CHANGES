@@ -1,3 +1,14 @@
+* 0.1.4.3 (7 June 2012)
+
+  - Import 'build' function from GHC.Exts instead of defining it by
+    hand, which can lead to some speedups (since GHC has special
+    rewriting rules for the version in GHC.Exts).  Of course this ties
+    it to GHC; if you want to build split under some other compiler,
+    let me know and I can add some CPP directives to define 'build'
+    conditionally.
+
+  - Remove unnecessary Rank2Types extension.
+
 * 0.1.4.2 (21 December 2011)
 
   - Bump version upper bound for base and Test with GHC 7.4.1rc1
