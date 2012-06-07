@@ -17,6 +17,11 @@
 module Data.List.Split.Internals where
 
 import Data.List (genericSplitAt)
+import GHC.Exts  (build)
+  -- Use the build from GHC.Exts because GHC has some rules that make
+  -- it faster.  If you want to build split under some compiler other
+  -- than GHC, let me know; it would be easy to add some CPP
+  -- conditionally defining build.
 
 -- * Types and utilities
 
@@ -125,10 +130,6 @@ isDelim _ = False
 isText :: Chunk a -> Bool
 isText (Text _) = True
 isText _ = False
-
--- | Standard build function.
-build :: (forall b. (a -> b -> b) -> b -> b) -> [a]
-build g = g (:) []
 
 -- * Implementation
 
