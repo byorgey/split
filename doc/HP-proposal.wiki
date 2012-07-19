@@ -1,0 +1,41 @@
+[[PageOutline]]
+
+= split package proposal =
+
+This is a proposal for the [http://hackage.haskell.org/package/split split package] to be included in the next major release of the Haskell platform.
+
+Everyone is invited to review this proposal, following the [http://trac.haskell.org/haskell-platform/wiki/AddingPackages standard procedure for proposing and reviewing packages].
+
+Review comments should be sent to the libraries mailing list by August 20 (arbitrarily chosen; there's plenty of time before the [http://trac.haskell.org/haskell-platform/wiki/ReleaseTimetable October 1 deadline].
+
+= Credits =
+
+Proposal author and package maintainer: Brent Yorgey <byorgey at cis.upenn.edu>
+
+= Abstract =
+
+The Data.List.Split module contains a wide range of strategies for splitting lists with respect to some sort of delimiter, mostly implemented through a unified combinator interface. The goal is to be a flexible yet simple alternative to the standard 'split' function found in some other mainstream languages.
+
+Documentation and tarball from the hackage page:
+
+  http://hackage.haskell.org/package/split
+
+Development repo:
+
+  darcs get http://code.haskell.org/~byorgey/code/split
+
+= Rationale =
+
+Splitting a list into chunks based on some sort of delimiter(s) is a
+common need, and
+
+XXX reverse deps
+XXX stability
+
+= API =
+
+For a detailed description of the package API, see [http://hackage.haskell.org/packages/archive/split/0.1.4.3/doc/html/Data-List-Split.html the Haddock documentation].
+
+= Open issues =
+
+XXX 'build' is GHC-specific
