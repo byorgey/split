@@ -27,15 +27,44 @@ Development repo:
 = Rationale =
 
 Splitting a list into chunks based on some sort of delimiter(s) is a
-common need, and
+common need, and is provided in the standard libraries of several
+mainstream languages (e.g. [http://docs.python.org/py3k/library/stdtypes.html?highlight=split#str.split Python], [http://www.ruby-doc.org/core-1.9.3/String.html#method-i-split Ruby], [http://docs.oracle.com/javase/7/docs/api/java/lang/String.html#split(java.lang.String) Java]).  Haskell beginners routinely ask whether such a function exists in the standard libraries.  For a long time, the answer was no.  Adding such a function to Haskell's standard libraries has been proposed multiple times over the years, but consensus was never reached on the design of such a function. (See, e.g. [http://www.haskell.org/pipermail/libraries/2006-July/005504.html], [http://www.haskell.org/pipermail/libraries/2006-October/006072.html], and [http://www.haskell.org/pipermail/libraries/2008-January/008922.html].)
 
-XXX reverse deps
-XXX stability
+In December 2008 the [http://hackage.haskell.org/package/split split package] was released, implementing not just a single split method, but a wide range of splitting strategies.
+
+Since then the split package has gained wide acceptance, with [http://packdeps.haskellers.com/reverse/split almost 95 reverse dependencies], putting it in the top 40 for number of reverse dependencies on Hackage.
+
+The package is quite stable. Since the 0.1.4 release in April 2011 only very minor updates have been made.  It has a large [http://code.haskell.org/~byorgey/code/split/Properties.hs suite of QuickCheck properties]; to my recollection no bugs have ever been reported.
 
 = API =
 
-For a detailed description of the package API, see [http://hackage.haskell.org/packages/archive/split/0.1.4.3/doc/html/Data-List-Split.html the Haddock documentation].
+For a detailed description of the package API and example usage, see [http://hackage.haskell.org/packages/archive/split/0.1.4.3/doc/html/Data-List-Split.html the Haddock documentation].
+
+= Design decisions =
+
+Most of the library is based around a (rather simple) combinator
+interface.  Combinators are used to build up configuration records
+(recording options such as whether to keep delimiters, whether to keep
+blank segments, etc).  A configuration record is finally handed off to
+a function which performs a generic maximally-information-preserving
+splitting algorithm and then does various postprocessing steps (based
+on the configuration) to selectively throw information away.  It is
+probably not the fastest way to implement these methods, but speed is
+explicitly not a design goal: the aim is to provide a reasonably wide
+range of splitting strategies which can be used simply.  Blazing speed
+(or more complex processing), when needed, can be obtained from a
+proper parsing package.
 
 = Open issues =
 
-XXX 'build' is GHC-specific
+== Use of GHC.Exts ==
+
+At the request of a user, the 0.1.4.3 release switched from defining its own version of the standard 'build' function, to importing it from GHC.Exts.  This allows GHC to do more optimization, resulting in reported speedups to uses of splitEvery, splitPlaces, and splitPlacesBlanks.  However, this makes the library GHC-specific.  If any reviewers think this is an issue I would be willing to go back to defining build by hand, or use CPP macros to select between build implementations based on the compiler.
+
+== Missing strategies ==
+
+The specific way that the generic splitting algorithm is implemented
+does preclude some imaginable splitting strategies.  For example, a
+few years ago I tried adding a strategy that used a predicate on pairs
+of elements, splitting down the middle of any pairs that satisfy the
+predicate, but gave up because it simply did not fit.
