@@ -1,11 +1,11 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.List.Split
--- Copyright   :  (c) Brent Yorgey, Louis Wasserman 2008
+-- Copyright   :  (c) Brent Yorgey, Louis Wasserman 2008-2012
 -- License     :  BSD-style (see LICENSE)
 -- Maintainer  :  Brent Yorgey <byorgey@gmail.com>
 -- Stability   :  stable
--- Portability :  GADTs
+-- Portability :  Haskell 2010
 --
 -- The "Data.List.Split" module contains a wide range of strategies
 -- for splitting lists with respect to some sort of delimiter, mostly
