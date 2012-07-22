@@ -1,4 +1,3 @@
-{-# LANGUAGE GADTs #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.List.Split.Internal
@@ -59,30 +58,25 @@ data Splitter a = Splitter { delimiter        :: Delimiter a
 --   the original input list.  This default strategy can be overridden
 --   to allow discarding various sorts of information.
 defaultSplitter :: Splitter a
-defaultSplitter = Splitter { delimiter        = DelimEltPred (const False)
+defaultSplitter = Splitter { delimiter        = Delimiter [const False]
                            , delimPolicy      = Keep
                            , condensePolicy   = KeepBlankFields
                            , initBlankPolicy  = KeepBlank
                            , finalBlankPolicy = KeepBlank
                            }
 
--- | A delimiter can either be a predicate on elements, or a list of
---   elements to be matched as a subsequence.
-data Delimiter a where
-  DelimEltPred :: (a -> Bool) -> Delimiter a
-  DelimSublist :: Eq a => [a] -> Delimiter a
+-- | A delimiter is a list of predicates on elements, matched by some
+--   contiguous subsequence of a list.
+newtype Delimiter a = Delimiter [a -> Bool]
 
 -- | Try to match a delimiter at the start of a list, either failing
 --   or decomposing the list into the portion which matched the delimiter
 --   and the remainder.
 matchDelim :: Delimiter a -> [a] -> Maybe ([a],[a])
-matchDelim (DelimEltPred p) (x:xs) | p x       = Just ([x],xs)
-                                   | otherwise = Nothing
-matchDelim (DelimEltPred _) [] = Nothing
-matchDelim (DelimSublist []) xs = Just ([],xs)
-matchDelim (DelimSublist _)  [] = Nothing
-matchDelim (DelimSublist (d:ds)) (x:xs)
-  | d == x = matchDelim (DelimSublist ds) xs >>= \(h,t) -> Just (d:h,t)
+matchDelim (Delimiter []) xs = Just ([],xs)
+matchDelim (Delimiter _)  [] = Nothing
+matchDelim (Delimiter (p:ps)) (x:xs)
+  | p x       = matchDelim (Delimiter ps) xs >>= \(h,t) -> Just (x:h,t)
   | otherwise = Nothing
 
 -- | What to do with delimiters?
@@ -150,21 +144,12 @@ splitInternal d xxs
   toSplitList (Just (delim,rest)) = Delim delim : splitInternal d rest
 
 breakDelim :: Delimiter a -> [a] -> ([a],Maybe ([a],[a]))
-breakDelim d@(DelimEltPred p) (x:xs)
-  | p x       = ([],Just ([x],xs))
-  | otherwise = let (ys,match) = breakDelim d xs in (x:ys,match)
-breakDelim (DelimEltPred _) []  = ([],Nothing)
-breakDelim (DelimSublist []) xs = ([],Just ([],xs))
-breakDelim (DelimSublist _)  [] = ([],Nothing)
-breakDelim (DelimSublist ds) xxs@(x:xs) =
-  case matchSublist ds xxs of
-      Nothing   -> let (ys,match) = breakDelim (DelimSublist ds) xs in (x:ys,match)
-      Just rest -> ([],Just (ds,rest))
-
-matchSublist :: Eq a => [a] -> [a] -> Maybe [a]
-matchSublist [] xs = Just xs
-matchSublist _  [] = Nothing
-matchSublist (d:ds) (x:xs) = if d==x then matchSublist ds xs else Nothing
+breakDelim (Delimiter []) xs         = ([],Just ([],xs))
+breakDelim _              []         = ([],Nothing)
+breakDelim d              xxs@(x:xs) =
+  case matchDelim d xxs of
+      Nothing    -> let (ys,match) = breakDelim d xs in (x:ys,match)
+      Just match -> ([], Just match)
 
 -- | Given a split list in the internal tagged representation, produce
 --   a new internal tagged representation corresponding to the final
@@ -260,7 +245,7 @@ split s = map fromElem . postProcess s . splitInternal (delimiter s)
 --
 -- > split (oneOf "xyz") "aazbxyzcxd" == ["aa","z","b","x","","y","","z","c","x","d"]
 oneOf :: Eq a => [a] -> Splitter a
-oneOf elts = defaultSplitter { delimiter = DelimEltPred (`elem` elts) }
+oneOf elts = defaultSplitter { delimiter = Delimiter [(`elem` elts)] }
 
 -- | A splitting strategy that splits on the given list, when it is
 --   encountered as an exact subsequence.  For example:
@@ -277,14 +262,14 @@ oneOf elts = defaultSplitter { delimiter = DelimEltPred (`elem` elts) }
 --   this, you are better off using @'splitEvery' 1@, or better yet,
 --   @'map' (:[])@.
 onSublist :: Eq a => [a] -> Splitter a
-onSublist lst = defaultSplitter { delimiter = DelimSublist lst }
+onSublist lst = defaultSplitter { delimiter = Delimiter (map (==) lst) }
 
 -- | A splitting strategy that splits on any elements that satisfy the
 --   given predicate.  For example:
 --
 -- > split (whenElt (<0)) [2,4,-3,6,-9,1] == [[2,4],[-3],[6],[-9],[1]]
 whenElt :: (a -> Bool) -> Splitter a
-whenElt p = defaultSplitter { delimiter = DelimEltPred p }
+whenElt p = defaultSplitter { delimiter = Delimiter [p] }
 
 -- ** Strategy transformers
 
