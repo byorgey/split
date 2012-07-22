@@ -475,9 +475,10 @@ chunk = splitEvery
 -- > splitPlaces [4,9] [1..10] == [[1,2,3,4],[5,6,7,8,9,10]]
 -- > splitPlaces [4,9,3] [1..10] == [[1,2,3,4],[5,6,7,8,9,10]]
 --
---   The behavior of @'splitPlaces' ls xs@ when @'sum' ls /= 'length' xs@ can
---   be inferred from the above examples and the fact that 'splitPlaces'
---   is total.
+--   If the input list is longer than the total of the given lengths,
+--   then the remaining elements are dropped. If the list is shorter
+--   than the total of the given lengths, then the result may contain
+--   fewer chunks than requested, and the last chunk may be shorter.
 splitPlaces :: Integral a => [a] -> [e] -> [[e]]
 splitPlaces is ys = build (splitPlacer is ys) where
   splitPlacer :: Integral i => [i] -> [b] -> ([b] -> t -> t) -> t -> t
@@ -486,13 +487,20 @@ splitPlaces is ys = build (splitPlacer is ys) where
   splitPlacer (l:ls) xs c n = let (x1, x2) = genericSplitAt l xs
                               in  x1 `c` splitPlacer ls x2 c n
 
--- | Split a list into chunks of the given lengths. Unlike 'splitPlaces', the
--- output list will always be the same length as the first input argument. For
--- example:
+-- | Split a list into chunks of the given lengths. Unlike
+--   'splitPlaces', the output list will always be the same length as
+--   the first input argument. If the input list is longer than the
+--   total of the given lengths, then the remaining elements are
+--   dropped. If the list is shorter than the total of the given
+--   lengths, then the last several chunks will be shorter than
+--   requested or empty. For example:
 --
 -- > splitPlacesBlanks [2,3,4] [1..20] == [[1,2],[3,4,5],[6,7,8,9]]
 -- > splitPlacesBlanks [4,9] [1..10] == [[1,2,3,4],[5,6,7,8,9,10]]
 -- > splitPlacesBlanks [4,9,3] [1..10] == [[1,2,3,4],[5,6,7,8,9,10],[]]
+--
+--   Notice the empty list in the output of the third example, which
+--   differs from the behavior of 'splitPlaces'.
 splitPlacesBlanks :: Integral a => [a] -> [e] -> [[e]]
 splitPlacesBlanks is ys = build (splitPlacer is ys) where
   splitPlacer :: Integral i => [i] -> [b] -> ([b] -> t -> t) -> t -> t
