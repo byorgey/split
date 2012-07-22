@@ -5,9 +5,9 @@ import Data.List.Split.Internals
 import Test.QuickCheck
 import Test.QuickCheck.Function
 
+import Control.Monad
 import System.Environment
 import Text.Printf
-import Control.Monad
 
 import Data.Char
 import Data.Functor
@@ -20,13 +20,6 @@ newtype Elt = Elt { unElt :: Char }
 instance Show Elt where
   show (Elt c) = show c
 
-instance Read Elt where
-  readsPrec _ []     = []
-  readsPrec p s =
-    case readsPrec p s of
-      [(c,s')] -> [(Elt c, s')]
-      _        -> []
-
 instance Arbitrary Elt where
   arbitrary = elements (map Elt "abcde")
 
@@ -34,7 +27,7 @@ instance CoArbitrary Elt where
   coarbitrary = coarbitrary . ord . unElt
 
 instance Function Elt where
-  function = functionShow
+  function = functionMap unElt Elt
 
 deriving instance Show (Splitter Elt)
 
