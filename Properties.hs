@@ -3,12 +3,14 @@ module Properties where
 
 import Data.List.Split.Internals
 import Test.QuickCheck
+import Test.QuickCheck.Function
 
 import System.Environment
 import Text.Printf
 import Control.Monad
 
 import Data.Char
+import Data.Functor
 import Data.List (isInfixOf, isPrefixOf, isSuffixOf, tails, intercalate, genericTake, group)
 import Data.Maybe (isJust)
 
@@ -18,26 +20,29 @@ newtype Elt = Elt { unElt :: Char }
 instance Show Elt where
   show (Elt c) = show c
 
+instance Read Elt where
+  readsPrec _ []     = []
+  readsPrec p s =
+    case readsPrec p s of
+      [(c,s')] -> [(Elt c, s')]
+      _        -> []
+
 instance Arbitrary Elt where
   arbitrary = elements (map Elt "abcde")
 
 instance CoArbitrary Elt where
   coarbitrary = coarbitrary . ord . unElt
 
-instance Show (Elt -> Bool) where
-  show p = "abcde -> " ++ map (toTF . p . Elt) "abcde"
-    where toTF b = if b then 'T' else 'F'
-
-instance Show (Delimiter Elt) where
-  show (DelimEltPred p) = show p
-  show (DelimSublist s) = show s
+instance Function Elt where
+  function = functionShow
 
 deriving instance Show (Splitter Elt)
 
-instance (Arbitrary a, CoArbitrary a, Eq a) => Arbitrary (Delimiter a) where
-  arbitrary = oneof [ liftM DelimEltPred arbitrary
-                    , liftM DelimSublist arbitrary
-                    ]
+instance Show (Delimiter Elt) where
+  show (Delimiter ps) = show (map function ps)
+
+instance (Arbitrary a, CoArbitrary a, Function a) => Arbitrary (Delimiter a) where
+  arbitrary = (Delimiter . map apply) <$> arbitrary
 
 instance Arbitrary a => Arbitrary (Chunk a) where
   arbitrary = oneof [ liftM Text (listOf arbitrary)
@@ -53,8 +58,13 @@ instance Arbitrary CondensePolicy where
 instance Arbitrary EndPolicy where
   arbitrary = elements [DropBlank, KeepBlank]
 
-instance (Arbitrary a, CoArbitrary a, Eq a) => Arbitrary (Splitter a) where
+instance (Arbitrary a, CoArbitrary a, Function a) => Arbitrary (Splitter a) where
   arbitrary = liftM5 Splitter arbitrary arbitrary arbitrary arbitrary arbitrary
+
+type Delim a = [Fun a Bool]
+
+unDelim :: Delim a -> Delimiter a
+unDelim = Delimiter . map apply
 
 main :: IO ()
 main = do
@@ -118,28 +128,30 @@ main = do
 prop_default_id :: [Elt] -> Bool
 prop_default_id l = split defaultSplitter l == [l]
 
-prop_match_decompose :: Delimiter Elt -> [Elt] -> Bool
-prop_match_decompose d l = maybe True ((==l) . uncurry (++)) $ matchDelim d l
+prop_match_decompose :: Delim Elt -> [Elt] -> Bool
+prop_match_decompose d l = maybe True ((==l) . uncurry (++)) $ matchDelim (unDelim d) l
 
-isDelimMatch :: Delimiter Elt -> [Elt] -> Bool
-isDelimMatch d l = matchDelim d l == Just (l,[])
+isDelimMatch :: Delim Elt -> [Elt] -> Bool
+isDelimMatch d l = matchDelim (unDelim d) l == Just (l,[])
 
-prop_match_yields_delim :: Delimiter Elt -> [Elt] -> Bool
+prop_match_yields_delim :: Delim Elt -> [Elt] -> Bool
 prop_match_yields_delim d l =
-    case matchDelim d l of
+    case matchDelim (unDelim d) l of
       Nothing -> True
       Just (del,rest) -> isDelimMatch d del
 
-prop_splitInternal_lossless :: Delimiter Elt -> [Elt] -> Bool
-prop_splitInternal_lossless d l = concatMap fromElem (splitInternal d l) == l
+prop_splitInternal_lossless :: Delim Elt -> [Elt] -> Bool
+prop_splitInternal_lossless d l = concatMap fromElem (splitInternal (unDelim d) l) == l
 
-prop_splitInternal_yields_delims :: Delimiter Elt -> [Elt] -> Bool
+prop_splitInternal_yields_delims :: Delim Elt -> [Elt] -> Bool
 prop_splitInternal_yields_delims d l =
-    all (isDelimMatch d) $ [ del | (Delim del) <- splitInternal d l ]
+    all (isDelimMatch d) $ [ del | (Delim del) <- splitInternal d' l ]
+  where d' = unDelim d
 
-prop_splitInternal_text_not_delims :: Delimiter Elt -> [Elt] -> Bool
+prop_splitInternal_text_not_delims :: Delim Elt -> [Elt] -> Bool
 prop_splitInternal_text_not_delims d l =
-    all (not . isDelimMatch d) $ [ ch | (Text ch) <- splitInternal d l ]
+    all (not . isDelimMatch d) $ [ ch | (Text ch) <- splitInternal d' l ]
+  where d' = unDelim d
 
 noConsecDelims :: SplitList Elt -> Bool
 noConsecDelims [] = True
@@ -187,12 +199,12 @@ prop_onSublist_not_text sub l =
     (not . null $ sub) ==>
       all (not . isInfixOf sub) $ getTexts (onSublist sub) l
 
-prop_whenElt :: (Elt -> Bool) -> [Elt] -> Bool
-prop_whenElt p l = all ((==1) . length) ds && all (p . head) ds
+prop_whenElt :: (Fun Elt Bool) -> [Elt] -> Bool
+prop_whenElt (Fun _ p) l = all ((==1) . length) ds && all (p . head) ds
   where ds = getDelims (whenElt p) l
 
-prop_whenElt_not_text :: (Elt -> Bool) -> [Elt] -> Bool
-prop_whenElt_not_text p l = all (not . p) (concat cs)
+prop_whenElt_not_text :: (Fun Elt Bool) -> [Elt] -> Bool
+prop_whenElt_not_text (Fun _ p) l = all (not . p) (concat cs)
   where cs = getTexts (whenElt p) l
 
 process :: Splitter Elt -> [Elt] -> SplitList Elt
