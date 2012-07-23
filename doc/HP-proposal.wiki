@@ -83,6 +83,10 @@ This effectively does away with any confusion the synonyms may cause,
 WITHOUT breaking any existing code, since the synonyms are still
 exported.  Note, however, that I do plan to bump the major version number, as [http://www.haskell.org/haskellwiki/Package_versioning_policy#Deprecation recommended by the package versioning policy].
 
+== Consistency with existing names ==
+
+Bryan O'Sullivan [http://article.gmane.org/gmane.comp.lang.haskell.libraries/17675 pointed out] that the text package has an existing function, essentially identical in functionality to splitEvery, called chunksOf.  In the interest of consistency with an existing HP package, I have renamed splitEvery to chunksOf (and deprecated and pruned splitEvery, just like the other synonyms as explained above).
+
 = Open issues =
 
 == Use of GHC.Exts ==
