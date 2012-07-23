@@ -55,11 +55,51 @@ range of splitting strategies which can be used simply.  Blazing speed
 (or more complex processing), when needed, can be obtained from a
 proper parsing package.
 
+= Discussion =
+
+Initial discussion of the proposal can be [http://thread.gmane.org/gmane.comp.lang.haskell.libraries/17649/ found here].
+
+= Resolved issues =
+
+I have made some changes to the package as a result of discussion,
+explained below.  The changes can be seen in the
+[http://code.haskell.org/~byorgey/code/split darcs repository]; a new
+version of the package has not yet been released.
+
+== Use of GADTs/ExistentialQuantification ==
+
+Henning Thielemann [http://article.gmane.org/gmane.comp.lang.haskell.libraries/17650 asked] whether the GADTs extension is really necessary.  Twan van Laarhoven [http://article.gmane.org/gmane.comp.lang.haskell.libraries/17659 suggested] a way around it.  I have adopted a variant of Twan's proposal, and the package is now fully Haskell 2010 compliant.
+
+== Synonyms ==
+
+[http://article.gmane.org/gmane.comp.lang.haskell.libraries/17653 Roman Cheplyaka] and others expressed distaste at the presence of synonyms for several functions in the library, arguing that it unnecessarily complicates the API and makes it harder to read others' code.
+
+Following a [http://article.gmane.org/gmane.comp.lang.haskell.libraries/17669 suggestion from Simon Hengel], I have adopted the solution of
+
+ * marking the synonyms as deprecated;
+ * passing the "prune" option to haddock so they are not documented as part of the API.
+
+This effectively does away with any confusion the synonyms may cause,
+WITHOUT breaking any existing code, since the synonyms are still
+exported.  Note, however, that I do plan to bump the major version number, as [http://www.haskell.org/haskellwiki/Package_versioning_policy#Deprecation recommended by the package versioning policy].
+
 = Open issues =
 
 == Use of GHC.Exts ==
 
 At the request of a user, the 0.1.4.3 release switched from defining its own version of the standard 'build' function, to importing it from GHC.Exts.  This allows GHC to do more optimization, resulting in reported speedups to uses of splitEvery, splitPlaces, and splitPlacesBlanks.  However, this makes the library GHC-specific.  If any reviewers think this is an issue I would be willing to go back to defining build by hand, or use CPP macros to select between build implementations based on the compiler.
+
+ * Henning Thielemann [http://article.gmane.org/gmane.comp.lang.haskell.libraries/17650 suggested]:
+
+  You could provide two private modules with the same name in
+  different directories, one that re-exports 'build' from GHC.Exts and
+  one with a custom definition of 'build' for non-GHC compilers. Then
+  set 'Hs-Source-Dirs' in Cabal according to the impl(ghc). No CPP
+  needed, only Cabal. One could even think of a separate package for
+  this purpose.
+
+I am currently investigating whether this can be made to work (and how
+it affects building the test suite).
 
 == Missing strategies ==
 
