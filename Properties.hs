@@ -98,9 +98,8 @@ main = do
             , ("startsWithOneOf",               qc prop_startsWithOneOf)
             , ("endsWith",                      qc prop_endsWith)
             , ("endsWithOneOf",                 qc prop_endsWithOneOf)
-            , ("unintercalate/right inv",       qc prop_unintercalate_right_inv)
-       --   , ("unintercalate/left inv",        qc prop_unintercalate_left_inv)
-            , ("unintercalate/idem",            qc prop_unintercalate_intercalate_idem)
+            , ("splitOn/right inv",             qc prop_splitOn_right_inv)
+            , ("splitOn/idem",                  qc prop_splitOn_intercalate_idem)
             , ("splitEvery/lengths",            qc prop_splitEvery_all_n)
             , ("splitEvery/last <= n",          qc prop_splitEvery_last_less_n)
             , ("splitEvery/preserve",           qc prop_splitEvery_preserve)
@@ -254,25 +253,27 @@ prop_endsWith s (NonEmpty l) = all (s `isSuffixOf`) (init $ split (endsWith s) l
 prop_endsWithOneOf :: [Elt] -> NonEmptyList Elt -> Bool
 prop_endsWithOneOf elts (NonEmpty l) = all ((`elem` elts) . last) (init $ split (endsWithOneOf elts) l)
 
-prop_unintercalate_right_inv :: [Elt] -> [Elt] -> Bool
-prop_unintercalate_right_inv x l = intercalate x (unintercalate x l) == l
+prop_splitOn_right_inv :: [Elt] -> [Elt] -> Bool
+prop_splitOn_right_inv x l = intercalate x (splitOn x l) == l
 
 {- This property fails: for example,
 
-      unintercalate "dd" (intercalate "dd" ["d",""]) == ["","d"]
+      splitOn "dd" (intercalate "dd" ["d",""]) == ["","d"]
 
-  so it's not enough just to say that the delimiter is not an infix of
-  any elements of l!
+   so it's not enough just to say that the delimiter is not an infix of
+   any elements of l!
 
 
-prop_unintercalate_left_inv :: [Elt] -> NonEmptyList [Elt] -> Property
-prop_unintercalate_left_inv x (NonEmpty ls) = not (any (x `isInfixOf`) ls) ==>
-                                      unintercalate x (intercalate x ls) == ls
+prop_splitOn_left_inv :: [Elt] -> NonEmptyList [Elt] -> Property
+prop_splitOn_left_inv x (NonEmpty ls) = not (any (x `isInfixOf`) ls) ==>
+                                        splitOn x (intercalate x ls) == ls
 -}
 
-prop_unintercalate_intercalate_idem :: [Elt] -> [[Elt]] -> Bool
-prop_unintercalate_intercalate_idem x ls = f (f ls) == f ls
-  where f = unintercalate x . intercalate x
+-- Note, the below property is in fact logically entailed by
+-- prop_splitOn_right_inv, but we keep it here just for kicks.
+prop_splitOn_intercalate_idem :: [Elt] -> [[Elt]] -> Bool
+prop_splitOn_intercalate_idem x ls = f (f ls) == f ls
+  where f = splitOn x . intercalate x
 
 prop_splitEvery_all_n :: Positive Int -> NonEmptyList Elt -> Bool
 prop_splitEvery_all_n (Positive n) (NonEmpty l) = all ((==n) . length) (init $ splitEvery n l)

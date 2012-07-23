@@ -1,3 +1,5 @@
+{-# OPTIONS_HADDOCK prune #-}
+
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.List.Split.Internals
@@ -381,6 +383,20 @@ splitOneOf = split . dropDelims . oneOf
 --   . 'dropDelims' . 'onSublist'@.  For example:
 --
 -- > splitOn ".." "a..b...c....d.." == ["a","b",".c","","d",""]
+--
+--   In some parsing combinator frameworks this is also known as
+--   @sepBy@.
+--
+--   Note that this is the right inverse of the 'Data.List.intercalate' function
+--   from "Data.List", that is,
+--
+--   > intercalate x . splitOn x == id
+--
+--   @'splitOn' x . 'Data.List.intercalate' x@ is the identity on
+--   certain lists, but it is tricky to state the precise conditions
+--   under which this holds.  (For example, it is not enough to say
+--   that @x@ does not occur in any elements of the input list.
+--   Working out why is left as an exercise for the reader.)
 splitOn :: Eq a => [a] -> [a] -> [[a]]
 splitOn   = split . dropDelims . onSublist
 
@@ -391,11 +407,11 @@ splitOn   = split . dropDelims . onSublist
 splitWhen :: (a -> Bool) -> [a] -> [[a]]
 splitWhen = split . dropDelims . whenElt
 
--- | A synonym for 'splitOn'.
+{-# DEPRECATED sepBy "Use splitOn." #-}
 sepBy :: Eq a => [a] -> [a] -> [[a]]
 sepBy = splitOn
 
--- | A synonym for 'splitOneOf'.
+{-# DEPRECATED sepByOneOf "Use splitOneOf." #-}
 sepByOneOf :: Eq a => [a] -> [a] -> [[a]]
 sepByOneOf = splitOneOf
 
@@ -415,19 +431,9 @@ endBy = split . dropFinalBlank . dropDelims . onSublist
 endByOneOf :: Eq a => [a] -> [a] -> [[a]]
 endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 
--- | A synonym for 'sepBy' \/ 'splitOn'.
---
---   Note that this is the right inverse of the 'intercalate' function
---   from "Data.List", that is, @'intercalate' x . 'unintercalate' x
---   == 'id'@.  It is also the case that @'unintercalate' x
---   . 'intercalate' x@ is idempotent.  @'unintercalate' x
---   . 'intercalate' x@ is the identity on certain lists, but it is
---   tricky to state the precise conditions under which this holds.
---   (For example, it is not enough to say that @x@ does not occur in
---   any elements of the input list.  Working out why is left as an
---   exercise for the reader.)
+{-# DEPRECATED unintercalate "Use splitOn." #-}
 unintercalate :: Eq a => [a] -> [a] -> [[a]]
-unintercalate = sepBy
+unintercalate = splitOn
 
 -- | Split into words, with word boundaries indicated by the given
 --   predicate.  Satisfies @words === wordsBy isSpace@; equivalent to
@@ -465,7 +471,7 @@ splitEvery i ls = map (take i) (build (splitter ls)) where
   splitter [] _ n = n
   splitter l c n  = l `c` splitter (drop i l) c n
 
--- | A common synonym for 'splitEvery'.
+{-# DEPRECATED chunk "Use splitEvery." #-}
 chunk :: Int -> [e] -> [[e]]
 chunk = splitEvery
 

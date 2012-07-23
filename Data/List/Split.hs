@@ -1,3 +1,5 @@
+{-# OPTIONS_HADDOCK prune #-}
+
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.List.Split
@@ -31,12 +33,8 @@ module Data.List.Split (
                          splitOn
                        , splitOneOf
                        , splitWhen
-                       , sepBy
-                       , sepByOneOf
                        , endBy
                        , endByOneOf
-
-                       , unintercalate
 
                        , wordsBy
                        , linesBy
@@ -44,7 +42,6 @@ module Data.List.Split (
                        -- * Other splitting methods
                        -- $other
                        , splitEvery
-                       , chunk
                        , splitPlaces
                        , splitPlacesBlanks
                        , chop
@@ -82,16 +79,26 @@ module Data.List.Split (
                        , endsWith
                        , endsWithOneOf
 
+                       -- The following synonyms are deprecated, but
+                       -- still exported for now.  No documentation is
+                       -- generated for them via the 'OPTIONS_HADDOCK
+                       -- prune' pragma.
+
+                       , sepBy
+                       , sepByOneOf
+                       , unintercalate
+                       , chunk
+
                        ) where
 
 import Data.List.Split.Internals
 
 -- $started
 -- To get started, you should take a look at the functions 'splitOn',
--- 'splitWhen', 'sepBy', 'endBy', 'splitEvery', 'splitPlaces', and
--- other functions listed in the next two sections.  These functions
--- implement various common splitting operations, and one of them will
--- probably do the job 90\% of the time.  For example:
+-- 'splitOneOf', 'splitWhen', 'endBy', 'splitEvery', 'splitPlaces',
+-- and other functions listed in the next two sections.  These
+-- functions implement various common splitting operations, and one of
+-- them will probably do the job 90\% of the time.  For example:
 --
 -- > > splitOn "x" "axbxc"
 -- > ["a","b","c"]
