@@ -1,0 +1,122 @@
+This is a proposal for the split package [1] to be included in the
+next major release of the Haskell platform.
+
+Everyone is invited to review this proposal, following the standard
+procedure [2] for proposing and reviewing packages.
+  
+Review comments should be sent to the libraries mailing list by August
+20 (arbitrarily chosen; there's plenty of time before the October 1
+deadline [3]). The Haskell Platform wiki will be kept up-to-date with
+the results of the review process:
+
+  http://trac.haskell.org/haskell-platform/wiki/Proposals/split
+
+[1] http://hackage.haskell.org/package/split
+[2] http://trac.haskell.org/haskell-platform/wiki/AddingPackages 
+[3] http://trac.haskell.org/haskell-platform/wiki/ReleaseTimetable
+
+Credits
+=======
+
+Proposal author and package maintainer: 
+  Brent Yorgey <byorgey at cis.upenn.edu>
+
+Abstract
+========
+
+The Data.List.Split module contains a wide range of strategies for
+splitting lists with respect to some sort of delimiter, mostly
+implemented through a unified combinator interface. The goal is to be
+a flexible yet simple alternative to the standard 'split' function
+found in some other mainstream languages.
+
+Documentation and tarball from the hackage page:
+
+  http://hackage.haskell.org/package/split
+
+Development repo:
+
+  darcs get http://code.haskell.org/~byorgey/code/split
+
+Rationale
+=========
+
+Splitting a list into chunks based on some sort of delimiter(s) is a
+common need, and is provided in the standard libraries of several
+mainstream languages (e.g. Python [4], Ruby [5], Java [6]).  Haskell
+beginners routinely ask whether such a function exists in the standard
+libraries.  For a long time, the answer was no.  Adding such a
+function to Haskell's standard libraries has been proposed multiple
+times over the years, but consensus was never reached on the design of
+such a function. (See, e.g. [7, 8, 9].) 
+
+[4] http://docs.python.org/py3k/library/stdtypes.html?highlight=split#str.split
+[5] http://www.ruby-doc.org/core-1.9.3/String.html#method-i-split
+[6] http://docs.oracle.com/javase/7/docs/api/java/lang/String.html#split(java.lang.String)
+[7] http://www.haskell.org/pipermail/libraries/2006-July/005504.html
+[8] http://www.haskell.org/pipermail/libraries/2006-October/006072.html
+[9] http://www.haskell.org/pipermail/libraries/2008-January/008922.html
+
+In December 2008 the split package was released, implementing not just
+a single split method, but a wide range of splitting strategies.
+
+Since then the split package has gained wide acceptance, with almost
+95 reverse dependencies [10], putting it in the top 40 for number of
+reverse dependencies on Hackage.
+
+[10] http://packdeps.haskellers.com/reverse/split 
+
+The package is quite stable. Since the 0.1.4 release in April 2011
+only very minor updates have been made.  It has a large suite of
+QuickCheck properties [11]; to my recollection no bugs have ever been
+reported.
+
+[11] http://code.haskell.org/~byorgey/code/split/Properties.hs
+
+API
+===
+
+For a detailed description of the package API and example usage, see
+the Haddock documentation:
+
+  http://hackage.haskell.org/packages/archive/split/0.1.4.3/doc/html/Data-List-Split.html
+
+Design decisions
+================
+
+Most of the library is based around a (rather simple) combinator
+interface.  Combinators are used to build up configuration records
+(recording options such as whether to keep delimiters, whether to keep
+blank segments, etc).  A configuration record is finally handed off to
+a function which performs a generic maximally-information-preserving
+splitting algorithm and then does various postprocessing steps (based
+on the configuration) to selectively throw information away.  It is
+probably not the fastest way to implement these methods, but speed is
+explicitly not a design goal: the aim is to provide a reasonably wide
+range of splitting strategies which can be used simply.  Blazing speed
+(or more complex processing), when needed, can be obtained from a
+proper parsing package.
+
+Open issues
+===========
+
+Use of GHC.Exts
+---------------
+
+At the request of a user, the 0.1.4.3 release switched from defining
+its own version of the standard 'build' function, to importing it from
+GHC.Exts.  This allows GHC to do more optimization, resulting in
+reported speedups to uses of splitEvery, splitPlaces, and
+splitPlacesBlanks.  However, this makes the library GHC-specific.  If
+any reviewers think this is an issue I would be willing to go back to
+defining build by hand, or use CPP macros to select between build
+implementations based on the compiler.
+
+Missing strategies
+------------------
+
+The specific way that the generic splitting algorithm is implemented
+does preclude some imaginable splitting strategies.  For example, a
+few years ago I tried adding a strategy that used a predicate on pairs
+of elements, splitting down the middle of any pairs that satisfy the
+predicate, but gave up because it simply did not fit.

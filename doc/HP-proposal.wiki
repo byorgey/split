@@ -6,7 +6,7 @@ This is a proposal for the [http://hackage.haskell.org/package/split split packa
 
 Everyone is invited to review this proposal, following the [http://trac.haskell.org/haskell-platform/wiki/AddingPackages standard procedure for proposing and reviewing packages].
 
-Review comments should be sent to the libraries mailing list by August 20 (arbitrarily chosen; there's plenty of time before the [http://trac.haskell.org/haskell-platform/wiki/ReleaseTimetable October 1 deadline].
+Review comments should be sent to the libraries mailing list by August 20 (arbitrarily chosen; there's plenty of time before the [http://trac.haskell.org/haskell-platform/wiki/ReleaseTimetable October 1 deadline]).
 
 = Credits =
 
