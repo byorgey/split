@@ -17,8 +17,8 @@
 
 module Data.List.Split.Internals where
 
-import Data.List (genericSplitAt)
-import GHC.Exts  (build)
+import           Data.List (genericSplitAt)
+import           GHC.Exts  (build)
   -- Use the build from GHC.Exts because GHC has some rules that make
   -- it faster.  If you want to build split under some compiler other
   -- than GHC, let me know; it would be easy to add some CPP
@@ -100,7 +100,7 @@ data CondensePolicy = Condense         -- ^ Condense into a single delimiter.
   deriving (Eq, Show)
 
 -- | What to do with a blank chunk at either end of the list
---   (i.e. when the list begins or ends with a delimiter).
+--   (/i.e./ when the list begins or ends with a delimiter).
 data EndPolicy = DropBlank | KeepBlank
   deriving (Eq, Show)
 
@@ -131,8 +131,11 @@ isText _ = False
 
 -- | Given a delimiter to use, split a list into an internal
 --   representation with chunks tagged as delimiters or text.  This
---   transformation is lossless; in particular, @'concatMap' 'fromElem'
---   ('splitInternal' d l) == l@.
+--   transformation is lossless; in particular,
+--
+-- @
+--   'concatMap' 'fromElem' ('splitInternal' d l) == l.
+-- @
 splitInternal :: Delimiter a -> [a] -> SplitList a
 splitInternal _ [] = []
 splitInternal d xxs
@@ -145,6 +148,7 @@ splitInternal d xxs
   toSplitList (Just ([],r:rs))    = Delim [] : Text [r] : splitInternal d rs
   toSplitList (Just (delim,rest)) = Delim delim : splitInternal d rest
 
+-- |
 breakDelim :: Delimiter a -> [a] -> ([a],Maybe ([a],[a]))
 breakDelim (Delimiter []) xs         = ([],Just ([],xs))
 breakDelim _              []         = ([],Nothing)
@@ -390,7 +394,7 @@ splitOneOf = split . dropDelims . oneOf
 --   Note that this is the right inverse of the 'Data.List.intercalate' function
 --   from "Data.List", that is,
 --
---   > intercalate x . splitOn x == id
+--   > intercalate x . splitOn x === id
 --
 --   @'splitOn' x . 'Data.List.intercalate' x@ is the identity on
 --   certain lists, but it is tricky to state the precise conditions
@@ -427,7 +431,10 @@ endBy :: Eq a => [a] -> [a] -> [[a]]
 endBy = split . dropFinalBlank . dropDelims . onSublist
 
 -- | Split into chunks terminated by one of the given elements.
---   Equivalent to @'split' . 'dropFinalBlank' . 'dropDelims' . 'oneOf'@.
+--   Equivalent to @'split' . 'dropFinalBlank' . 'dropDelims'
+--   . 'oneOf'@. For example:
+--
+-- > endByOneOf ";," "foo;bar,baz;" == ["foo","bar","baz"]
 endByOneOf :: Eq a => [a] -> [a] -> [[a]]
 endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 

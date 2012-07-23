@@ -12,10 +12,9 @@
 -- The "Data.List.Split" module contains a wide range of strategies
 -- for splitting lists with respect to some sort of delimiter, mostly
 -- implemented through a unified combinator interface.  The goal is to
--- be flexible yet simple.  Scroll past the Synopsis for usage,
--- examples, and detailed documentation of all exported functions.  If
--- you want to learn about the implementation, see
--- "Data.List.Split.Internals".
+-- be flexible yet simple.  See below for usage, examples, and
+-- detailed documentation of all exported functions.  If you want to
+-- learn about the implementation, see "Data.List.Split.Internals".
 --
 -- A darcs repository containing the source (including a module with
 -- over 40 QuickCheck properties) can be found at
@@ -91,7 +90,7 @@ module Data.List.Split (
 
                        ) where
 
-import Data.List.Split.Internals
+import           Data.List.Split.Internals
 
 -- $started
 -- To get started, you should take a look at the functions 'splitOn',
@@ -102,32 +101,38 @@ import Data.List.Split.Internals
 --
 -- > > splitOn "x" "axbxc"
 -- > ["a","b","c"]
+-- >
 -- > > splitOn "x" "axbxcx"
 -- > ["a","b","c",""]
+-- >
 -- > > endBy ";" "foo;bar;baz;"
 -- > ["foo","bar","baz"]
+-- >
 -- > > splitWhen (<0) [1,3,-4,5,7,-9,0,2]
 -- > [[1,3],[5,7],[0,2]]
+-- >
 -- > > splitOneOf ";.," "foo,bar;baz.glurk"
 -- > ["foo","bar","baz","glurk"]
+-- >
 -- > > splitEvery 3 ['a'..'z']
 -- > ["abc","def","ghi","jkl","mno","pqr","stu","vwx","yz"]
 --
 -- If you want more flexibility, however, you can use the combinator
 -- library in terms of which these functions are defined.  For more
--- information, skip to the section labeled \"Splitting Combinators\".
+-- information, see the section labeled \"Splitting Combinators\".
 --
--- Note that the goal of this library is to be flexible yet simple.
--- It does not implement any particularly sophisticated list-splitting
--- methods, nor is it tuned for speed.  If you find yourself wanting
--- something more complicated or optimized, it probably means you
--- should use a real parsing or regular expression library.
+-- The goal of this library is to be flexible yet simple.  It does not
+-- implement any particularly sophisticated list-splitting methods,
+-- nor is it tuned for speed.  If you find yourself wanting something
+-- more complicated or optimized, it probably means you should use a
+-- real parsing or regular expression library.
 
 -- $conv
 -- These functions implement some common splitting strategies.  Note
 -- that all of the functions in this section drop delimiters from the
--- final output, since that is a more common use case even though it
--- is not the default.
+-- final output, since that is a more common use case.  If you wish to
+-- keep the delimiters somehow, see the \"Splitting Combinators\"
+-- section.
 
 -- $other
 -- Other useful splitting methods which are not implemented using the
