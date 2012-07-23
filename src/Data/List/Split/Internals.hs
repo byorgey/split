@@ -265,7 +265,7 @@ oneOf elts = defaultSplitter { delimiter = Delimiter [(`elem` elts)] }
 -- > split (dropDelims . dropBlanks $ onSublist "") "abc" == ["a","b","c"]
 --
 --   However, if you want to break a list into singleton elements like
---   this, you are better off using @'splitEvery' 1@, or better yet,
+--   this, you are better off using @'chunksOf' 1@, or better yet,
 --   @'map' (:[])@.
 onSublist :: Eq a => [a] -> Splitter a
 onSublist lst = defaultSplitter { delimiter = Delimiter (map (==) lst) }
@@ -461,27 +461,31 @@ linesBy = split . dropFinalBlank . dropDelims . whenElt
 
 -- * Other splitting methods
 
--- | @'splitEvery' n@ splits a list into length-n pieces.  The last
+-- | @'chunksOf' n@ splits a list into length-n pieces.  The last
 --   piece will be shorter if @n@ does not evenly divide the length of
---   the list.  If @n <= 0@, @'splitEvery' n l@ returns an infinite list
+--   the list.  If @n <= 0@, @'chunksOf' n l@ returns an infinite list
 --   of empty lists.  For example:
 --
---   Note that @'splitEvery' n []@ is @[]@, not @[[]]@.  This is
+--   Note that @'chunksOf' n []@ is @[]@, not @[[]]@.  This is
 --   intentional, and is consistent with a recursive definition of
---   'splitEvery'; it satisfies the property that
+--   'chunksOf'; it satisfies the property that
 --
---   @splitEvery n xs ++ splitEvery n ys == splitEvery n (xs ++ ys)@
+--   @chunksOf n xs ++ chunksOf n ys == chunksOf n (xs ++ ys)@
 --
 --   whenever @n@ evenly divides the length of @xs@.
-splitEvery :: Int -> [e] -> [[e]]
-splitEvery i ls = map (take i) (build (splitter ls)) where
+chunksOf :: Int -> [e] -> [[e]]
+chunksOf i ls = map (take i) (build (splitter ls)) where
   splitter :: [e] -> ([e] -> a -> a) -> a -> a
   splitter [] _ n = n
   splitter l c n  = l `c` splitter (drop i l) c n
 
-{-# DEPRECATED chunk "Use splitEvery." #-}
+{-# DEPRECATED chunk "Use chunksOf." #-}
 chunk :: Int -> [e] -> [[e]]
-chunk = splitEvery
+chunk = chunksOf
+
+{-# DEPRECATED splitEvery "Use chunksOf." #-}
+splitEvery :: Int -> [e] -> [[e]]
+splitEvery = chunksOf
 
 -- | Split a list into chunks of the given lengths. For example:
 --

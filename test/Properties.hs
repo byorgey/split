@@ -104,13 +104,13 @@ main = do
             , ("splitOn/idem",                  qc prop_splitOn_intercalate_idem)
             , ("splitOn/empty delim",           qc prop_splitOn_empty_delim)
             , ("split/empty delim",             qc prop_split_empty_delim_drop)
-            , ("splitEvery/lengths",            qc prop_splitEvery_all_n)
-            , ("splitEvery/last <= n",          qc prop_splitEvery_last_less_n)
-            , ("splitEvery/preserve",           qc prop_splitEvery_preserve)
+            , ("chunksOf/lengths",              qc prop_chunksOf_all_n)
+            , ("chunksOf/last <= n",            qc prop_chunksOf_last_less_n)
+            , ("chunksOf/preserve",             qc prop_chunksOf_preserve)
             , ("splitPlaces/lengths",           qc prop_splitPlaces_lengths)
             , ("splitPlaces/last <= n",         qc prop_splitPlaces_last_less_n)
             , ("splitPlaces/preserve",          qc prop_splitPlaces_preserve)
-            , ("splitPlaces/splitEvery",        qc prop_splitPlaces_splitEvery)
+            , ("splitPlaces/chunksOf",          qc prop_splitPlaces_chunksOf)
             , ("splitPlacesB/length",           qc prop_splitPlacesB_length)
             , ("splitPlacesB/last <= n",        qc prop_splitPlacesB_last_less_n)
             , ("splitPlacesB/preserve",         qc prop_splitPlacesB_preserve)
@@ -286,14 +286,14 @@ prop_split_empty_delim_drop :: [Elt] -> Bool
 prop_split_empty_delim_drop ls
   = split (dropDelims . dropBlanks $ onSublist []) ls == map (:[]) ls
 
-prop_splitEvery_all_n :: Positive Int -> NonEmptyList Elt -> Bool
-prop_splitEvery_all_n (Positive n) (NonEmpty l) = all ((==n) . length) (init $ splitEvery n l)
+prop_chunksOf_all_n :: Positive Int -> NonEmptyList Elt -> Bool
+prop_chunksOf_all_n (Positive n) (NonEmpty l) = all ((==n) . length) (init $ chunksOf n l)
 
-prop_splitEvery_last_less_n :: Positive Int -> NonEmptyList Elt -> Bool
-prop_splitEvery_last_less_n (Positive n) (NonEmpty l) = (<=n) . length . last $ splitEvery n l
+prop_chunksOf_last_less_n :: Positive Int -> NonEmptyList Elt -> Bool
+prop_chunksOf_last_less_n (Positive n) (NonEmpty l) = (<=n) . length . last $ chunksOf n l
 
-prop_splitEvery_preserve :: Positive Int -> [Elt] -> Bool
-prop_splitEvery_preserve (Positive n) l = concat (splitEvery n l) == l
+prop_chunksOf_preserve :: Positive Int -> [Elt] -> Bool
+prop_chunksOf_preserve (Positive n) l = concat (chunksOf n l) == l
 
 prop_splitPlaces_lengths :: [NonNegative Int] -> [Elt] -> Bool
 prop_splitPlaces_lengths ps = and . mInit . zipWith (==) ps' . map length . splitPlaces ps'
@@ -308,8 +308,8 @@ prop_splitPlaces_preserve :: [NonNegative Integer] -> [Elt] -> Bool
 prop_splitPlaces_preserve ps l = concat (splitPlaces ps' l) == genericTake (sum ps') l
   where ps' = map unNN ps
 
-prop_splitPlaces_splitEvery :: Positive Int -> [Elt] -> Bool
-prop_splitPlaces_splitEvery (Positive n) l = splitPlaces (repeat n) l == splitEvery n l
+prop_splitPlaces_chunksOf :: Positive Int -> [Elt] -> Bool
+prop_splitPlaces_chunksOf (Positive n) l = splitPlaces (repeat n) l == chunksOf n l
 
 prop_splitPlacesB_length :: [NonNegative Int] -> [Elt] -> Bool
 prop_splitPlacesB_length ps xs = length ps' == length (splitPlacesBlanks ps' xs)

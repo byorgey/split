@@ -40,7 +40,7 @@ module Data.List.Split (
 
                        -- * Other splitting methods
                        -- $other
-                       , splitEvery
+                       , chunksOf
                        , splitPlaces
                        , splitPlacesBlanks
                        , chop
@@ -86,6 +86,7 @@ module Data.List.Split (
                        , sepBy
                        , sepByOneOf
                        , unintercalate
+                       , splitEvery
                        , chunk
 
                        ) where
@@ -94,7 +95,7 @@ import           Data.List.Split.Internals
 
 -- $started
 -- To get started, you should take a look at the functions 'splitOn',
--- 'splitOneOf', 'splitWhen', 'endBy', 'splitEvery', 'splitPlaces',
+-- 'splitOneOf', 'splitWhen', 'endBy', 'chunksOf', 'splitPlaces',
 -- and other functions listed in the next two sections.  These
 -- functions implement various common splitting operations, and one of
 -- them will probably do the job 90\% of the time.  For example:
@@ -114,7 +115,7 @@ import           Data.List.Split.Internals
 -- > > splitOneOf ";.," "foo,bar;baz.glurk"
 -- > ["foo","bar","baz","glurk"]
 -- >
--- > > splitEvery 3 ['a'..'z']
+-- > > chunksOf 3 ['a'..'z']
 -- > ["abc","def","ghi","jkl","mno","pqr","stu","vwx","yz"]
 --
 -- If you want more flexibility, however, you can use the combinator
