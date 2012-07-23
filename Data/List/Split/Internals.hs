@@ -435,17 +435,18 @@ endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 unintercalate :: Eq a => [a] -> [a] -> [[a]]
 unintercalate = splitOn
 
--- | Split into words, with word boundaries indicated by the given
---   predicate.  Satisfies @words === wordsBy isSpace@; equivalent to
---   @split . dropBlanks . dropDelims . whenElt@.  For example:
+-- | Split into \"words\", with word boundaries indicated by the given
+--   predicate.  Satisfies @'Data.List.words' === wordsBy
+--   'Data.Char.isSpace'@; equivalent to @'split' . 'dropBlanks'
+--   . 'dropDelims' . 'whenElt'@.  For example:
 --
 -- > wordsBy (=='x') "dogxxxcatxbirdxx" == ["dog","cat","bird"]
 wordsBy :: (a -> Bool) -> [a] -> [[a]]
 wordsBy = split . dropBlanks . dropDelims . whenElt
 
--- | Split into lines, with line boundaries indicated by the given
---   predicate. Satisfies @lines === linesBy (=='\n')@; equivalent to
---   @split . dropFinalBlank . dropDelims . whenElt@.  For example:
+-- | Split into \"lines\", with line boundaries indicated by the given
+--   predicate. Satisfies @'lines' === linesBy (=='\n')@; equivalent to
+--   @'split' . 'dropFinalBlank' . 'dropDelims' . 'whenElt'@.  For example:
 --
 -- > linesBy (=='x') "dogxxxcatxbirdxx" == ["dog","","","cat","bird",""]
 linesBy :: (a -> Bool) -> [a] -> [[a]]
@@ -456,7 +457,7 @@ linesBy = split . dropFinalBlank . dropDelims . whenElt
 -- | @'splitEvery' n@ splits a list into length-n pieces.  The last
 --   piece will be shorter if @n@ does not evenly divide the length of
 --   the list.  If @n <= 0@, @'splitEvery' n l@ returns an infinite list
---   of empty lists.
+--   of empty lists.  For example:
 --
 --   Note that @'splitEvery' n []@ is @[]@, not @[[]]@.  This is
 --   intentional, and is consistent with a recursive definition of
@@ -484,7 +485,8 @@ chunk = splitEvery
 --   If the input list is longer than the total of the given lengths,
 --   then the remaining elements are dropped. If the list is shorter
 --   than the total of the given lengths, then the result may contain
---   fewer chunks than requested, and the last chunk may be shorter.
+--   fewer chunks than requested, and the last chunk may be shorter
+--   than requested.
 splitPlaces :: Integral a => [a] -> [e] -> [[e]]
 splitPlaces is ys = build (splitPlacer is ys) where
   splitPlacer :: Integral i => [i] -> [b] -> ([b] -> t -> t) -> t -> t
