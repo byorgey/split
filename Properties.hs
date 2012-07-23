@@ -1,18 +1,20 @@
-{-# LANGUAGE FlexibleInstances, StandaloneDeriving #-}
-module Properties where
+{-# LANGUAGE FlexibleInstances  #-}
+{-# LANGUAGE StandaloneDeriving #-}
+module Main where
 
-import Data.List.Split.Internals
-import Test.QuickCheck
-import Test.QuickCheck.Function
+import           Data.List.Split.Internals
+import           Test.QuickCheck
+import           Test.QuickCheck.Function
 
-import Control.Monad
-import System.Environment
-import Text.Printf
+import           Control.Monad
+import           System.Environment
+import           Text.Printf
 
-import Data.Char
-import Data.Functor
-import Data.List (isInfixOf, isPrefixOf, isSuffixOf, tails, intercalate, genericTake, group)
-import Data.Maybe (isJust)
+import           Data.Char
+import           Data.Functor
+import           Data.List                 (genericTake, group, intercalate, isInfixOf, isPrefixOf,
+ isSuffixOf, tails)
+import           Data.Maybe                (isJust)
 
 newtype Elt = Elt { unElt :: Char }
   deriving (Eq)
@@ -100,6 +102,8 @@ main = do
             , ("endsWithOneOf",                 qc prop_endsWithOneOf)
             , ("splitOn/right inv",             qc prop_splitOn_right_inv)
             , ("splitOn/idem",                  qc prop_splitOn_intercalate_idem)
+            , ("splitOn/empty delim",           qc prop_splitOn_empty_delim)
+            , ("split/empty delim",             qc prop_split_empty_delim_drop)
             , ("splitEvery/lengths",            qc prop_splitEvery_all_n)
             , ("splitEvery/last <= n",          qc prop_splitEvery_last_less_n)
             , ("splitEvery/preserve",           qc prop_splitEvery_preserve)
@@ -274,6 +278,13 @@ prop_splitOn_left_inv x (NonEmpty ls) = not (any (x `isInfixOf`) ls) ==>
 prop_splitOn_intercalate_idem :: [Elt] -> [[Elt]] -> Bool
 prop_splitOn_intercalate_idem x ls = f (f ls) == f ls
   where f = splitOn x . intercalate x
+
+prop_splitOn_empty_delim :: [Elt] -> Bool
+prop_splitOn_empty_delim ls = splitOn [] ls == [] : map (:[]) ls
+
+prop_split_empty_delim_drop :: [Elt] -> Bool
+prop_split_empty_delim_drop ls
+  = split (dropDelims . dropBlanks $ onSublist []) ls == map (:[]) ls
 
 prop_splitEvery_all_n :: Positive Int -> NonEmptyList Elt -> Bool
 prop_splitEvery_all_n (Positive n) (NonEmpty l) = all ((==n) . length) (init $ splitEvery n l)
