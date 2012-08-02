@@ -36,6 +36,7 @@ Category:            List
 Build-type:          Simple
 Cabal-Version:       >= 1.10
 Tested-with:         GHC ==7.0.4, GHC ==7.2.1, GHC ==7.4.1
+Bug-reports:         http://code.google.com/p/byorgey/issues/list?q=Project:split
 
 Test-suite split-tests
   type:              exitcode-stdio-1.0
