@@ -51,7 +51,7 @@ Source-repository head
 
 Library
   ghc-options:       -Wall
-  build-depends:     base <4.6
+  build-depends:     base <4.7
   exposed-modules:   Data.List.Split, Data.List.Split.Internals
   default-language:  Haskell2010
   Hs-source-dirs:    src
