@@ -29,7 +29,7 @@ Synopsis:            Combinator library for splitting lists.
 License:             BSD3
 License-file:        LICENSE
 Copyright:           (c) Brent Yorgey, Louis Wasserman 2008-2012
-Extra-source-files:  README, Properties.hs, CHANGES
+Extra-source-files:  README, test/Properties.hs, CHANGES
 Author:              Brent Yorgey
 Maintainer:          byorgey@cis.upenn.edu
 Category:            List
