@@ -35,8 +35,8 @@ Maintainer:          byorgey@cis.upenn.edu
 Category:            List
 Build-type:          Simple
 Cabal-Version:       >= 1.10
-Tested-with:         GHC ==7.0.4, GHC ==7.2.1, GHC ==7.4.1
-Bug-reports:         http://code.google.com/p/byorgey/issues/list?q=Project:split
+Tested-with:         GHC ==7.0.4, GHC ==7.2.1, GHC ==7.4.*, GHC ==7.6.1
+Bug-reports:         http://hub.darcs.net/byorgey/split/issues
 
 Test-suite split-tests
   type:              exitcode-stdio-1.0
@@ -47,7 +47,7 @@ Test-suite split-tests
 
 Source-repository head
   type:              darcs
-  location:          http://code.haskell.org/~byorgey/code/split
+  location:          http://hub.darcs.net/byorgey/split
 
 Library
   ghc-options:       -Wall
