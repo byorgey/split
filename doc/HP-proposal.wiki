@@ -87,13 +87,9 @@ exported.  Note, however, that I do plan to bump the major version number, as [h
 
 Bryan O'Sullivan [http://article.gmane.org/gmane.comp.lang.haskell.libraries/17675 pointed out] that the text package has an existing function, essentially identical in functionality to splitEvery, called chunksOf.  In the interest of consistency with an existing HP package, I have renamed splitEvery to chunksOf (and deprecated and pruned splitEvery, just like the other synonyms as explained above).
 
-= Open issues =
-
 == Use of GHC.Exts ==
 
-At the request of a user, the 0.1.4.3 release switched from defining its own version of the standard 'build' function, to importing it from GHC.Exts.  This allows GHC to do more optimization, resulting in reported speedups to uses of splitEvery, splitPlaces, and splitPlacesBlanks.  However, this makes the library GHC-specific.  If any reviewers think this is an issue I would be willing to go back to defining build by hand, or use CPP macros to select between build implementations based on the compiler.
-
- * Henning Thielemann [http://article.gmane.org/gmane.comp.lang.haskell.libraries/17650 suggested]:
+At the request of a user, the 0.1.4.3 release switched from defining its own version of the standard 'build' function, to importing it from GHC.Exts.  This allows GHC to do more optimization, resulting in reported speedups to uses of splitEvery, splitPlaces, and splitPlacesBlanks.  However, this makes the library GHC-specific.  I outlined the options [http://article.gmane.org/gmane.comp.lang.haskell.libraries/17759 in a message to the libraries mailing list].  Several suggestions were made, including this [http://article.gmane.org/gmane.comp.lang.haskell.libraries/17650 suggestion by Henning Thielemann]:
 
   You could provide two private modules with the same name in
   different directories, one that re-exports 'build' from GHC.Exts and
@@ -102,7 +98,11 @@ At the request of a user, the 0.1.4.3 release switched from defining its own ver
   needed, only Cabal. One could even think of a separate package for
   this purpose.
 
-I have a patch which implements this proposal, which can be seen in the [http://code.haskell.org/~byorgey/code/split-build split-build] repo.  I am not sure whether the benefit outweighs the extra complication. Opinions welcome.
+This looks like it could work, but it adds a lot of complication for not much benefit.
+
+In the end, in the interest of simplicity and full Haskell2010 compliance, I simply went back to defining build manually. [http://article.gmane.org/gmane.comp.lang.haskell.libraries/17760 Henning also suggested] that there ought to be a package providing 'build' in a generic way, so that you get the right version depending which compiler you are using.  If this ever happens I would be happy to depend on that package.
+
+= Open issues =
 
 == Missing strategies ==
 
