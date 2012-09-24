@@ -9,10 +9,12 @@ Dependencies:
 
   There are no dependencies other than the base package.
   Data.List.Split has been tested with versions of GHC from 6.8.3 up
-  through 7.6.1.
+  through 7.6.1.  It is completely Haskell2010 (probably also
+  Haskell98) compliant, so it probably builds with other compilers as
+  well.
 
   The Properties.hs file depends on QuickCheck >= 2.4, but you don't
-  need it in order to build the library.
+  need it in order to build the library itself, only to run the tests.
 
 Build with Cabal:
 
