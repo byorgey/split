@@ -8,32 +8,19 @@ delimiter.
 Dependencies:
 
   There are no dependencies other than the base package.
-  Data.List.Split has been tested with GHC 6.8.3 and 6.10.1, but it
-  will likely work with older versions of GHC and other Haskell
-  compilers as well.
+  Data.List.Split has been tested with versions of GHC from 6.8.3 up
+  through 7.6.1.
 
-  The Properties.hs file depends on QuickCheck >= 2.1, but you don't
+  The Properties.hs file depends on QuickCheck >= 2.4, but you don't
   need it in order to build the library.
-
 
 Build with Cabal:
 
-    cabal install --prefix=$HOME --user
-
-  Or, if you don't have the 'cabal' tool:
-    
-    runhaskell Setup.lhs configure --prefix=$HOME --user
-    runhaskell Setup.lhs build
-    runhaskell Setup.lhs install
-
-  (Optionally, you can omit the --prefix and --user arguments to the
-  configure step, and run the install step with 'sudo' in order to
-  install the library systemwide.)
-
+    cabal install
 
 Building Haddock documentation (recommended):
 
-    runhaskell Setup.lhs haddock
+    cabal haddock
 
   Once the documentation has been built, you can access it by 
   pointing your browser to dist/doc/html/split/index.html.
