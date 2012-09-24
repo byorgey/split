@@ -18,7 +18,7 @@
 --
 -- A darcs repository containing the source (including a module with
 -- over 40 QuickCheck properties) can be found at
--- <http://code.haskell.org/~byorgey/code/split>.
+-- <http://hub.darcs.net/byorgey/split>.
 --
 -----------------------------------------------------------------------------
 module Data.List.Split (

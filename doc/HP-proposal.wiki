@@ -22,7 +22,7 @@ Documentation and tarball from the hackage page:
 
 Development repo:
 
-  darcs get http://code.haskell.org/~byorgey/code/split
+  darcs get http://hub.darcs.net/byorgey/split
 
 = Rationale =
 
