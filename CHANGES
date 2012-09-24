@@ -1,3 +1,22 @@
+* 0.2.1.1 (24 September 2012)
+
+  - Update this CHANGES file with details from the past two releases.
+
+* 0.2.1.0 (24 September 2012)
+
+  - Go back to generic definition of 'build' (reverses change
+    introduced in 0.1.4.3), for simplicity and Haskell2010 compliance.
+
+* 0.2.0.0 (21 August 2012)
+
+  - test with GHC 7.6.1 and bump base dependency to allow base-4.6
+
+  - deprecate synonyms: sepBy, sepByOneOf, unintercalate, chunk
+
+  - rename splitEvery to chunksOf
+
+  - unify Delimiter definition, and get rid of GADTs extension
+
 * 0.1.4.3 (7 June 2012)
 
   - Import 'build' function from GHC.Exts instead of defining it by
