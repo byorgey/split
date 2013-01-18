@@ -26,3 +26,7 @@ Building Haddock documentation (recommended):
 
   Once the documentation has been built, you can access it by 
   pointing your browser to dist/doc/html/split/index.html.
+
+Running the tests:
+
+    runhaskell -isrc test/Properties.hs
