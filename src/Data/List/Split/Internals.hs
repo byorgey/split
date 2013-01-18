@@ -211,7 +211,13 @@ mergeLeft (c : l) = c : mergeLeft l
 -- | Merge delimiters with adjacent chunks to the left.
 mergeRight :: SplitList a -> SplitList a
 mergeRight [] = []
-mergeRight ((Text c) : (Delim d) : l) = Text (c++d) : mergeRight l
+-- below fanciness is with the goal of laziness: we want to start returning
+-- stuff before we've necessarily discovered a delimiter, in case we're
+-- processing some infinite list with no delimiter
+mergeRight ((Text c) : l) = Text (c++d) : mergeRight lTail
+  where (d, lTail) = case l of
+                     Delim d' : l' -> (d', l')
+                     _ -> ([], l)
 mergeRight (c : l) = c : mergeRight l
 
 -- | Drop an initial blank chunk according to the given 'EndPolicy'.
