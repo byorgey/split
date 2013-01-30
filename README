@@ -29,4 +29,4 @@ Building Haddock documentation (recommended):
 
 Running the tests:
 
-    runhaskell -isrc test/Properties.hs
+  cabal configure --enable-tests && cabal build && cabal test
