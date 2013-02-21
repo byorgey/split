@@ -143,7 +143,6 @@ splitInternal d xxs
   toSplitList (Just ([],r:rs))    = Delim [] : Text [r] : splitInternal d rs
   toSplitList (Just (delim,rest)) = Delim delim : splitInternal d rest
 
--- |
 breakDelim :: Delimiter a -> [a] -> ([a],Maybe ([a],[a]))
 breakDelim (Delimiter []) xs         = ([],Just ([],xs))
 breakDelim _              []         = ([],Nothing)
