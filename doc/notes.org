@@ -1,6 +1,6 @@
 * Thoughts on refactoring to support splitting on binary predicates
 
-Need something more general than 
+Need something more general than
 
   newtype Delimiter a = Delimiter [a -> Bool]
 
@@ -18,7 +18,8 @@ data DelimToken = DelimStart | DelimEnd
 data SplitterMachine a =
     Output (Either DelimToken a) (SplitterMachine a)
   | Input (Maybe a -> SplitterMachine a)
- 
+  | Done
+
 the Maybe is to be able to indicate EOL.
 
 This ought to work, but leaves some questions open:
@@ -34,3 +35,17 @@ This would mean deleting 'matchDelim', rewriting 'splitInternal', and
 reimplementing some of the basic splitting combinators.  All the
 splitter policy stuff and the rest of the internal implementation
 could remain the same.
+
+Here's an example of reimplementing one of the primitives using this
+sort of machine:
+
+oneOf elts =
+  Input f
+    where
+      f (Just a) | a `elem` elts =
+        Output (Left DelimStart)
+          (Output (Right a)
+             (Output (Left DelimEnd) (oneOf elts)))
+                 | otherwise = Output (Right a) (oneOf elts)
+      f Nothing = Done
+
