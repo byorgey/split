@@ -1,0 +1,36 @@
+* Thoughts on refactoring to support splitting on binary predicates
+
+Need something more general than 
+
+  newtype Delimiter a = Delimiter [a -> Bool]
+
+since this (a) doesn't let us use context from non-delimiter parts,
+and (b) forces us to treat each element independently -- we can't
+combine two or more elements to decide whether we have a delimiter.
+
+Had talked before about something machine/transducer-like,
+which takes one element at a time and can output either data tokens
+(guaranteed to output the same tokens as those that are input), but
+also tokens indicating the start and end of delimiters.
+
+data DelimToken = DelimStart | DelimEnd
+
+data SplitterMachine a =
+    Output (Either DelimToken a) (SplitterMachine a)
+  | Input (Maybe a -> SplitterMachine a)
+ 
+the Maybe is to be able to indicate EOL.
+
+This ought to work, but leaves some questions open:
+
+  1. Can it be made as lazy/efficient as the current implementation?
+     Would have to add some tests for laziness and some benchmarks?
+
+  2. The representation admits a lot of "junk" (e.g. machines which
+     actually modify the input, which never terminate a delimiter,
+     etc.) which might not be desirable.
+
+This would mean deleting 'matchDelim', rewriting 'splitInternal', and
+reimplementing some of the basic splitting combinators.  All the
+splitter policy stuff and the rest of the internal implementation
+could remain the same.
