@@ -89,6 +89,10 @@ data DelimPolicy = Drop      -- ^ Drop delimiters from the output.
 
 -- | What to do with multiple consecutive delimiters?
 data CondensePolicy = Condense         -- ^ Condense into a single delimiter.
+                    | DropBlankFields  -- ^ Keep consecutive
+                                       --   delimiters separate, but
+                                       --   don't insert blank chunks in
+                                       --   between them.
                     | KeepBlankFields  -- ^ Insert blank chunks
                                        --   between consecutive
                                        --   delimiters.
@@ -160,7 +164,7 @@ postProcess s = dropFinal (finalBlankPolicy s)
               . dropInitial (initBlankPolicy s)
               . doMerge (delimPolicy s)
               . doDrop (delimPolicy s)
-              . insertBlanks
+              . insertBlanks (condensePolicy s)
               . doCondense (condensePolicy s)
 
 -- | Drop delimiters if the 'DelimPolicy' is 'Drop'.
@@ -171,27 +175,30 @@ doDrop _ l = l
 -- | Condense multiple consecutive delimiters into one if the
 --   'CondensePolicy' is 'Condense'.
 doCondense :: CondensePolicy -> SplitList a -> SplitList a
-doCondense KeepBlankFields ls = ls
 doCondense Condense ls = condense' ls
   where condense' [] = []
         condense' (c@(Text _) : l) = c : condense' l
         condense' l = (Delim $ concatMap fromElem ds) : condense' rest
           where (ds,rest) = span isDelim l
+doCondense _ ls = ls
 
--- | Insert blank chunks between any remaining consecutive delimiters,
---   and at the beginning or end if the first or last element is a
---   delimiter.
-insertBlanks :: SplitList a -> SplitList a
-insertBlanks [] = [Text []]
-insertBlanks (d@(Delim _) : l) = Text [] : insertBlanks' (d:l)
-insertBlanks l = insertBlanks' l
+-- | Insert blank chunks between any remaining consecutive delimiters
+--   (unless the condense policy is 'DropBlankFields'), and at the
+--   beginning or end if the first or last element is a delimiter.
+insertBlanks :: CondensePolicy -> SplitList a -> SplitList a
+insertBlanks _ [] = [Text []]
+insertBlanks cp (d@(Delim _) : l) = Text [] : insertBlanks' cp (d:l)
+insertBlanks cp l = insertBlanks' cp l
 
 -- | Insert blank chunks between consecutive delimiters.
-insertBlanks' :: SplitList a -> SplitList a
-insertBlanks' [] = []
-insertBlanks' (d1@(Delim _) : d2@(Delim _) : l) = d1 : Text [] : insertBlanks' (d2:l)
-insertBlanks' [d@(Delim _)] = [d, Text []]
-insertBlanks' (c : l) = c : insertBlanks' l
+insertBlanks' :: CondensePolicy -> SplitList a -> SplitList a
+insertBlanks' _ [] = []
+insertBlanks' cp@DropBlankFields (d1@(Delim _) : d2@(Delim _) : l)
+  = d1           : insertBlanks' cp (d2:l)
+insertBlanks' cp (d1@(Delim _) : d2@(Delim _) : l)
+  = d1 : Text [] : insertBlanks' cp (d2:l)
+insertBlanks' _ [d@(Delim _)] = [d, Text []]
+insertBlanks' cp (c : l) = c : insertBlanks' cp l
 
 -- | Merge delimiters into adjacent chunks according to the 'DelimPolicy'.
 doMerge :: DelimPolicy -> SplitList a -> SplitList a

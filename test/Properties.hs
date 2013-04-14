@@ -12,9 +12,11 @@ import           Text.Printf
 
 import           Data.Char
 import           Data.Functor
-import           Data.List                 (genericTake, group, intercalate, isInfixOf, isPrefixOf,
- isSuffixOf, tails)
+import           Data.List                 (genericTake, group, intercalate,
+                                            isInfixOf, isPrefixOf, isSuffixOf,
+                                            tails)
 import           Data.Maybe                (isJust)
+import           Safe                      (initSafe, tailSafe)
 
 newtype Elt = Elt { unElt :: Char }
   deriving (Eq)
@@ -78,6 +80,7 @@ main = do
             , ("doCondense/no consec delims",   qc prop_doCondense_no_consec_delims)
             , ("insBlanks/no consec delims",    qc prop_insBlanks_no_consec_delims)
             , ("insBlanks/fl not delims",       qc prop_insBlanks_fl_not_delim)
+            , ("insBlanks-drop/no blanks",      qc prop_insBlanks_drop_no_blanks)
             , ("mergeL/no delims",              qc prop_mergeL_no_delims)
             , ("mergeR/no delims",              qc prop_mergeR_no_delims)
             , ("oneOf",                         qc prop_oneOf)
@@ -159,19 +162,19 @@ prop_doCondense_no_consec_delims :: SplitList Elt -> Bool
 prop_doCondense_no_consec_delims l = noConsecDelims $ doCondense Condense l
 
 prop_insBlanks_no_consec_delims :: SplitList Elt -> Bool
-prop_insBlanks_no_consec_delims l = noConsecDelims $ insertBlanks l
+prop_insBlanks_no_consec_delims l = noConsecDelims $ insertBlanks Condense l
 
 prop_insBlanks_fl_not_delim :: SplitList Elt -> Bool
 prop_insBlanks_fl_not_delim l =
-    case insertBlanks l of
+    case insertBlanks Condense l of
       [] -> True
       xs -> (not . isDelim $ head xs) && (not . isDelim $ last xs)
 
 prop_mergeL_no_delims :: SplitList Elt -> Bool
-prop_mergeL_no_delims = all (not . isDelim) . mergeLeft . insertBlanks
+prop_mergeL_no_delims = all (not . isDelim) . mergeLeft . insertBlanks Condense
 
 prop_mergeR_no_delims :: SplitList Elt -> Bool
-prop_mergeR_no_delims = all (not . isDelim) . mergeRight . insertBlanks
+prop_mergeR_no_delims = all (not . isDelim) . mergeRight . insertBlanks Condense
 
 getDelims :: Splitter Elt -> [Elt] -> [[Elt]]
 getDelims s l = [ d | Delim d <- splitInternal (delimiter s) l ]
