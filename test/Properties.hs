@@ -16,7 +16,6 @@ import           Data.List                 (genericTake, group, intercalate,
                                             isInfixOf, isPrefixOf, isSuffixOf,
                                             tails)
 import           Data.Maybe                (isJust)
-import           Safe                      (initSafe, tailSafe)
 
 newtype Elt = Elt { unElt :: Char }
   deriving (Eq)
@@ -80,7 +79,6 @@ main = do
             , ("doCondense/no consec delims",   qc prop_doCondense_no_consec_delims)
             , ("insBlanks/no consec delims",    qc prop_insBlanks_no_consec_delims)
             , ("insBlanks/fl not delims",       qc prop_insBlanks_fl_not_delim)
-            , ("insBlanks-drop/no blanks",      qc prop_insBlanks_drop_no_blanks)
             , ("mergeL/no delims",              qc prop_mergeL_no_delims)
             , ("mergeR/no delims",              qc prop_mergeR_no_delims)
             , ("oneOf",                         qc prop_oneOf)
