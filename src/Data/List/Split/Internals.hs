@@ -332,10 +332,19 @@ dropInitBlank s = s { initBlankPolicy = DropBlank }
 dropFinalBlank :: Splitter a -> Splitter a
 dropFinalBlank s = s { finalBlankPolicy = DropBlank }
 
+-- | Don't generate blank chunks between consecutive delimiters.
+--   For example:
+--
+-- > split (oneOf ":") "::b:::a" == ["",":","",":","b",":","",":","",":","a"]
+-- > split (dropInnerBlanks $ oneOf ":") "::b:::a" == ["", ":",":","b",":",":",":","a"]
+dropInnerBlanks :: Splitter a -> Splitter a
+dropInnerBlanks s = s { condensePolicy = DropBlankFields }
+
 -- ** Derived combinators
 
--- | Drop all blank chunks from the output.  Equivalent to
---   @'dropInitBlank' . 'dropFinalBlank' . 'condense'@.  For example:
+-- | Drop all blank chunks from the output, and condense consecutive
+--   delimiters into one.  Equivalent to @'dropInitBlank'
+--   . 'dropFinalBlank' . 'condense'@.  For example:
 --
 -- > split (oneOf ":") "::b:::a" == ["",":","",":","b",":","",":","",":","a"]
 -- > split (dropBlanks $ oneOf ":") "::b:::a" == ["::","b",":::","a"]

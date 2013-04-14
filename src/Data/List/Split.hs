@@ -68,6 +68,7 @@ module Data.List.Split (
                        , condense
                        , dropInitBlank
                        , dropFinalBlank
+                       , dropInnerBlanks
 
                        -- ** Derived combinators
                        -- $derived
