@@ -120,6 +120,8 @@ main = do
             , ("linesBy/lines",                 qc prop_linesBy_lines)
             , ("chop/group",                    qc prop_chop_group)
             , ("chop/words",                    qc prop_chop_words)
+            , ("divvy/evenly",                  qc prop_divvy_evenly)
+            , ("divvy/prop_divvy_discard_remainder",  qc prop_divvy_discard_remainder)
             ]
 
 prop_default_id :: [Elt] -> Bool
@@ -357,3 +359,11 @@ prop_chop_group s = chop (\xs@(x:_) -> span (==x) xs) s == group s
 prop_chop_words :: [EltWS] -> Bool
 prop_chop_words s = words s' == (filter (not . null) . chop (span (not . isSpace) . dropWhile isSpace) $ s')
   where s' = map unEltWS s
+
+prop_divvy_evenly :: [Elt] -> Positive Int -> Property
+prop_divvy_evenly elems (Positive n) = (length elems `mod` n == 0) ==> concat (divvy n n elems) == elems
+
+prop_divvy_discard_remainder :: [Elt] -> Positive Int -> Bool
+prop_divvy_discard_remainder elems (Positive n) = concat (divvy n n elems) == (reverse . drop (length elems `mod` n) . reverse $ elems)
+
+
