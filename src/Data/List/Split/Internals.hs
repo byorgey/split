@@ -587,8 +587,7 @@ chop f as = b : chop f as'
 -- | From a source list, i. takes 'n' items then ii. increments by 'm'. iii. This
 -- repeats until the list is exhausted
 divvy :: Int -> Int -> [a] -> [[a]]
-divvy n m lst =
-  filter (\ws -> (n == length ws)) choppedl
-    where choppedl = chop (\xs -> (take n xs , drop m xs)) lst
-
+divvy _ _ [] = []
+divvy n m lst = filter (\ws -> (n == length ws)) choppedl
+  where choppedl = chop (\xs -> (take n xs , drop m xs)) lst
 

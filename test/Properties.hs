@@ -122,6 +122,8 @@ main = do
             , ("chop/words",                    qc prop_chop_words)
             , ("divvy/evenly",                  qc prop_divvy_evenly)
             , ("divvy/prop_divvy_discard_remainder",  qc prop_divvy_discard_remainder)
+            -- , ("divvy/prop_divvy_outputlists_allsame_length", qc prop_divvy_outputlists_allsame_length)
+            , ("divvy/prop_divvy_output_are_sublists", qc prop_divvy_output_are_sublists)
             ]
 
 prop_default_id :: [Elt] -> Bool
@@ -365,5 +367,13 @@ prop_divvy_evenly elems (Positive n) = (length elems `mod` n == 0) ==> concat (d
 
 prop_divvy_discard_remainder :: [Elt] -> Positive Int -> Bool
 prop_divvy_discard_remainder elems (Positive n) = concat (divvy n n elems) == (reverse . drop (length elems `mod` n) . reverse $ elems)
+
+prop_divvy_outputlists_allsame_length :: [Elt] -> Positive Int -> Bool
+prop_divvy_outputlists_allsame_length elems (Positive n) = and $ map (== head xs) (tail xs)
+  where xs = map length (divvy n n elems)
+
+prop_divvy_output_are_sublists :: [Elt] -> Positive Int -> Bool
+prop_divvy_output_are_sublists elems (Positive n) = and $ map (\x -> isInfixOf x elems) xs
+  where xs = divvy n n elems
 
 
