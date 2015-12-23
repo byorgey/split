@@ -584,17 +584,6 @@ chop f as = b : chop f as'
   where (b, as') = f as
 
 
-takeEvery :: Int -> [a] -> [a]
-takeEvery _ [] = []
-takeEvery n lst = (head lst) : takeEvery n (drop n lst)
-
-
-initNth :: Int -> [a] -> [a]
-initNth _ [] = []
-initNth 0 lst = lst
-initNth n lst = initNth (n - 1) (init lst)
-
-
 -- | From a source list, i. takes 'n' items then ii. increments by 'm'.
 --   iii. This repeats until the list is exhausted. iv. If there are not
 --   enough padding elements, drop the remaining items

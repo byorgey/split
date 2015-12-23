@@ -382,6 +382,15 @@ prop_divvy_output_are_sublists :: [Elt] -> Positive Int -> Bool
 prop_divvy_output_are_sublists elems (Positive n) = and $ map (\x -> isInfixOf x elems) xs
   where xs = divvy n n elems
 
+takeEvery :: Int -> [a] -> [a]
+takeEvery _ [] = []
+takeEvery n lst = (head lst) : takeEvery n (drop n lst)
+
+initNth :: Int -> [a] -> [a]
+initNth _ [] = []
+initNth 0 lst = lst
+initNth n lst = initNth (n - 1) (init lst)
+
 prop_divvy_m_different_than_n  :: [Elt] -> Positive Int -> Positive Int -> Bool
 prop_divvy_m_different_than_n [] _ _ = True
 prop_divvy_m_different_than_n elems (Positive n) (Positive m) = hds1 == hds2
