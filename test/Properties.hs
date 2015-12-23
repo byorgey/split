@@ -121,9 +121,10 @@ main = do
             , ("chop/group",                    qc prop_chop_group)
             , ("chop/words",                    qc prop_chop_words)
             , ("divvy/evenly",                  qc prop_divvy_evenly)
-            , ("divvy/prop_divvy_discard_remainder",  qc prop_divvy_discard_remainder)
-            , ("divvy/prop_divvy_outputlists_allsame_length", qc prop_divvy_outputlists_allsame_length)
-            , ("divvy/prop_divvy_output_are_sublists", qc prop_divvy_output_are_sublists)
+            , ("divvy/discard_remainder",  qc prop_divvy_discard_remainder)
+            , ("divvy/outputlists_allsame_length", qc prop_divvy_outputlists_allsame_length)
+            , ("divvy/output_are_sublists", qc prop_divvy_output_are_sublists)
+            , ("divvy/m_different_than_n", qc prop_divvy_m_different_than_n)
             ]
 
 prop_default_id :: [Elt] -> Bool
@@ -366,7 +367,8 @@ prop_divvy_evenly :: [Elt] -> Positive Int -> Property
 prop_divvy_evenly elems (Positive n) = (length elems `mod` n == 0) ==> concat (divvy n n elems) == elems
 
 prop_divvy_discard_remainder :: [Elt] -> Positive Int -> Bool
-prop_divvy_discard_remainder elems (Positive n) = concat (divvy n n elems) == (reverse . drop (length elems `mod` n) . reverse $ elems)
+prop_divvy_discard_remainder elems (Positive n) =
+  concat (divvy n n elems) == (reverse . drop (length elems `mod` n) . reverse $ elems)
 
 prop_divvy_outputlists_allsame_length :: [Elt] -> Positive Int -> Bool
 prop_divvy_outputlists_allsame_length elems (Positive n) = allSame xs
@@ -380,6 +382,9 @@ prop_divvy_output_are_sublists :: [Elt] -> Positive Int -> Bool
 prop_divvy_output_are_sublists elems (Positive n) = and $ map (\x -> isInfixOf x elems) xs
   where xs = divvy n n elems
 
+prop_divvy_m_different_than_n  :: [Elt] -> Positive Int -> Positive Int -> Bool
+prop_divvy_m_different_than_n [] _ _ = True
+prop_divvy_m_different_than_n elems (Positive n) (Positive m) = hds1 == hds2
+  where hds1 = takeEvery m (initNth (n - 1) elems)
+        hds2 = map head $ divvy n m elems
 
--- replace: and $ map (== head xs) (tail xs)
--- with: new function  allSame xs  and then define allSame xs by pattern-matching on xs
