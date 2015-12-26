@@ -370,26 +370,25 @@ prop_divvy_discard_remainder :: [Elt] -> Positive Int -> Bool
 prop_divvy_discard_remainder elems (Positive n) =
   concat (divvy n n elems) == (reverse . drop (length elems `mod` n) . reverse $ elems)
 
-prop_divvy_outputlists_allsame_length :: [Elt] -> Positive Int -> Bool
-prop_divvy_outputlists_allsame_length elems (Positive n) = allSame xs
+prop_divvy_outputlists_allsame_length :: [Elt] -> Positive Int -> Positive Int -> Bool
+prop_divvy_outputlists_allsame_length elems (Positive n) (Positive m) = allSame xs
   where
     allSame :: [Int] -> Bool
     allSame [] = True
     allSame zs = and $ map (== head zs) (tail zs)
-    xs = map length (divvy n n elems)
+    xs = map length (divvy n m elems)
 
-prop_divvy_output_are_sublists :: [Elt] -> Positive Int -> Bool
-prop_divvy_output_are_sublists elems (Positive n) = and $ map (\x -> isInfixOf x elems) xs
-  where xs = divvy n n elems
+prop_divvy_output_are_sublists :: [Elt] -> Positive Int -> Positive Int -> Bool
+prop_divvy_output_are_sublists elems (Positive n) (Positive m) = and $ map (\x -> isInfixOf x elems) xs
+  where xs = divvy n m elems
 
 takeEvery :: Int -> [a] -> [a]
 takeEvery _ [] = []
-takeEvery n lst = (head lst) : takeEvery n (drop n lst)
+takeEvery n lst = (map head . chunksOf n) $ lst
 
 initNth :: Int -> [a] -> [a]
 initNth _ [] = []
-initNth 0 lst = lst
-initNth n lst = initNth (n - 1) (init lst)
+initNth n lst = (reverse . drop n . reverse) $ lst
 
 prop_divvy_m_different_than_n  :: [Elt] -> Positive Int -> Positive Int -> Bool
 prop_divvy_m_different_than_n [] _ _ = True
