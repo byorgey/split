@@ -584,8 +584,11 @@ chop f as = b : chop f as'
   where (b, as') = f as
 
 -- | Divides up an input list into a set of sublists, according to 'n' and 'm'
---   input specificatinos you provide. Each sublist will have 'n' items. Then you
---   can step, ie. increment the start position of each suqsequent list, by 'm'.
+--   input specifications you provide. Each sublist will have 'n' items. You then
+--   step, ie. increment the start position of each suqsequent list, by 'm'.
+--
+-- > divvy 5 5 [1..20] == [[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15],[16,17,18,19,20]]
+-- > divvy 5 2 [1..10] == [[1,2,3,4,5],[3,4,5,6,7],[5,6,7,8,9]]
 --
 --   In the case where a source list's trailing elements do no fill an entire
 --   sublist, those trailing elements will be dropped.
