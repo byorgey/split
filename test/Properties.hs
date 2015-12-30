@@ -124,7 +124,7 @@ main = do
             , ("divvy/discard_remainder",  qc prop_divvy_discard_remainder)
             , ("divvy/outputlists_allsame_length", qc prop_divvy_outputlists_allsame_length)
             , ("divvy/output_are_sublists", qc prop_divvy_output_are_sublists)
-            , ("divvy/m_different_than_n", qc prop_divvy_m_different_than_n)
+            , ("divvy/heads", qc prop_divvy_heads)
             ]
 
 prop_default_id :: [Elt] -> Bool
@@ -390,9 +390,9 @@ initNth :: Int -> [a] -> [a]
 initNth _ [] = []
 initNth n lst = (reverse . drop n . reverse) $ lst
 
-prop_divvy_m_different_than_n  :: [Elt] -> Positive Int -> Positive Int -> Bool
-prop_divvy_m_different_than_n [] _ _ = True
-prop_divvy_m_different_than_n elems (Positive n) (Positive m) = hds1 == hds2
+prop_divvy_heads :: [Elt] -> Positive Int -> Positive Int -> Bool
+prop_divvy_heads [] _ _ = True
+prop_divvy_heads elems (Positive n) (Positive m) = hds1 == hds2
   where hds1 = takeEvery m (initNth (n - 1) elems)
         hds2 = map head $ divvy n m elems
 

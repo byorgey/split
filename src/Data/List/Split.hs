@@ -44,6 +44,7 @@ module Data.List.Split (
                        , splitPlaces
                        , splitPlacesBlanks
                        , chop
+                       , divvy
 
                        -- * Splitting combinators
                        -- $comb

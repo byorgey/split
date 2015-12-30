@@ -583,10 +583,26 @@ chop _ [] = []
 chop f as = b : chop f as'
   where (b, as') = f as
 
+-- | Divides up an input list into a set of sublists, according to 'n' and 'm'
+--   input specificatinos you provide. Each sublist will have 'n' items. Then you
+--   can step, ie. increment the start position of each suqsequent list, by 'm'.
+--
+--   In the case where a source list's trailing elements do no fill an entire
+--   sublist, those trailing elements will be dropped.
+--
+--   As an example, you can generate a moving average over a list of prices:
+-- 
+-- > type Prices = [Float]
+-- > type AveragePrices = [Float]
+-- > 
+-- > average :: [Float] -> Float
+-- > average xs = sum xs / (fromIntegral $ length xs)
+-- > 
+-- > simpleMovingAverage :: Prices -> AveragePrices
+-- > simpleMovingAverage priceList =
+-- >   map average divvyedPrices
+-- >     where divvyedPrices = divvy 20 1 priceList
 
--- | From a source list, i. takes 'n' items then ii. increments by 'm'.
---   iii. This repeats until the list is exhausted. iv. If there are not
---   enough padding elements, drop the remaining items
 divvy :: Int -> Int -> [a] -> [[a]]
 divvy _ _ [] = []
 divvy n m lst = filter (\ws -> (n == length ws)) choppedl
