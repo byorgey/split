@@ -35,7 +35,7 @@ Maintainer:          byorgey@gmail.com
 Category:            List
 Build-type:          Simple
 Cabal-Version:       >= 1.10
-Tested-with:         GHC ==7.0.4, GHC ==7.2.1, GHC ==7.4.*, GHC ==7.6.1
+Tested-with:         GHC ==7.0.4, GHC ==7.2.1, GHC ==7.4.*, GHC ==7.6.1, GHC ==7.8.3, GHC==7.10.3
 Bug-reports:         http://hub.darcs.net/byorgey/split/issues
 
 Test-suite split-tests
