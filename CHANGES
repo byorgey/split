@@ -1,3 +1,15 @@
+* 0.2.3 (12 January 2016)
+
+  - New function 'divvy' (with associated tests) from Tim Washington.
+
+* 0.2.2r2 (7 Jan 2016)
+
+  - allow base-4.9
+
+* 0.2.2r1 (12 Dec 2014)
+
+  - allow base-4.8
+
 * 0.2.2 (14 April 2013)
 
   - Add 'dropInnerBlanks' combinator for dropping blank chunks between
