@@ -1,3 +1,9 @@
+* 0.2.3.1 (2 May 2016)
+
+  - Fix a test case which was causing occasional spurious test suite
+    failures due to too many discarded tests.  Thanks to Doug
+    Beardsley and Peter Simons for reporting the issue.
+
 * 0.2.3 (12 January 2016)
 
   - New function 'divvy' (with associated tests) from Tim Washington.
