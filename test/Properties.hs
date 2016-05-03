@@ -363,8 +363,14 @@ prop_chop_words :: [EltWS] -> Bool
 prop_chop_words s = words s' == (filter (not . null) . chop (span (not . isSpace) . dropWhile isSpace) $ s')
   where s' = map unEltWS s
 
-prop_divvy_evenly :: [Elt] -> Positive Int -> Property
-prop_divvy_evenly elems (Positive n) = (length elems `mod` n == 0) ==> concat (divvy n n elems) == elems
+prop_divvy_evenly :: [Elt] -> Positive Int -> Bool
+prop_divvy_evenly elems (Positive n) = concat (divvy n n elems') == elems'
+  where
+    -- Chop off the smallest possible tail of elems to make the length
+    -- evenly divisible by n.  This property used to have a
+    -- precondition (length elemens `mod` n == 0), but that led to too
+    -- many discarded test cases and occasional test suite failures.
+    elems' = take ((length elems `div` n) * n) elems
 
 prop_divvy_discard_remainder :: [Elt] -> Positive Int -> Bool
 prop_divvy_discard_remainder elems (Positive n) =
