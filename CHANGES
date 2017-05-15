@@ -1,3 +1,7 @@
+* 0.2.3.2 (15 May 2017)
+
+  - Move to github.
+
 * 0.2.3.1 (2 May 2016)
 
   - Fix a test case which was causing occasional spurious test suite
