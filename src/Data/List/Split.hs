@@ -16,9 +16,9 @@
 -- detailed documentation of all exported functions.  If you want to
 -- learn about the implementation, see "Data.List.Split.Internals".
 --
--- A darcs repository containing the source (including a module with
+-- A git repository containing the source (including a module with
 -- over 40 QuickCheck properties) can be found at
--- <http://hub.darcs.net/byorgey/split>.
+-- <https://github.com/byorgey/split>.
 --
 -----------------------------------------------------------------------------
 module Data.List.Split (
