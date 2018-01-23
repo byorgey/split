@@ -1,3 +1,7 @@
+* 0.2.3.3 (23 Jan 2018)
+
+  - Update for GHC-8.4, test with GHC 7.0-8.4
+
 * 0.2.3.2 (15 May 2017)
 
   - Move to github.
