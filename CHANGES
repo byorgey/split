@@ -1,3 +1,7 @@
+* 0.2.3.3-r1 (2 August 2018)
+
+  - Allow base-4.12 for GHC-8.6
+
 * 0.2.3.3 (23 Jan 2018)
 
   - Update for GHC-8.4, test with GHC 7.0-8.4
