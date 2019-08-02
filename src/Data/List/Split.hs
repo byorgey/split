@@ -31,6 +31,7 @@ module Data.List.Split (
 
                          splitOn
                        , splitOneOf
+                       , splitOneOfSublist
                        , splitWhen
                        , endBy
                        , endByOneOf

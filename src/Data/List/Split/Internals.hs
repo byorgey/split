@@ -420,6 +420,11 @@ splitOneOf = split . dropDelims . oneOf
 splitOn :: Eq a => [a] -> [a] -> [[a]]
 splitOn   = split . dropDelims . onSublist
 
+-- | Split on any of the given sublists. Equivalent to @'concatM' . 'map' 'splitOn'@.
+splitOneOfSublist :: Eq a => [[a]] -> [a] -> [[a]]
+splitOneOfSublist = concatM . map splitOn where
+    concatM = foldl (\f g x -> f x >>= g) return
+
 -- | Split on elements satisfying the given predicate.  Equivalent to
 --   @'split' . 'dropDelims' . 'whenElt'@.  For example:
 --
@@ -595,13 +600,13 @@ chop f as = b : chop f as'
 -- > divvy 5 2 [1..10] == [[1,2,3,4,5],[3,4,5,6,7],[5,6,7,8,9]]
 --
 --   As an example, you can generate a moving average over a list of prices:
--- 
+--
 -- > type Prices = [Float]
 -- > type AveragePrices = [Float]
--- > 
+-- >
 -- > average :: [Float] -> Float
 -- > average xs = sum xs / (fromIntegral $ length xs)
--- > 
+-- >
 -- > simpleMovingAverage :: Prices -> AveragePrices
 -- > simpleMovingAverage priceList =
 -- >   map average divvyedPrices
@@ -611,4 +616,3 @@ divvy :: Int -> Int -> [a] -> [[a]]
 divvy _ _ [] = []
 divvy n m lst = filter (\ws -> (n == length ws)) choppedl
   where choppedl = chop (\xs -> (take n xs , drop m xs)) lst
-
