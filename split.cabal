@@ -35,7 +35,7 @@ Maintainer:          byorgey@gmail.com
 Category:            List
 Build-type:          Simple
 Cabal-Version:       >= 1.10
-Tested-with:         GHC ==7.0.4, GHC ==7.2.2, GHC ==7.4.2, GHC ==7.6.3, GHC ==7.8.4, GHC==7.10.3, GHC==8.0.2, GHC ==8.2.2, GHC==8.4.1
+Tested-with:         GHC ==7.0.4 || ==7.2.2 || ==7.4.2 || ==7.6.3 || ==7.8.4 || ==7.10.3 || ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.2 || ==8.10.1
 Bug-reports:         https://github.com/byorgey/split/issues
 
 Test-suite split-tests
@@ -51,7 +51,7 @@ Source-repository head
 
 Library
   ghc-options:       -Wall
-  build-depends:     base < 4.14
+  build-depends:     base < 4.15
   exposed-modules:   Data.List.Split, Data.List.Split.Internals
   default-language:  Haskell2010
   Hs-source-dirs:    src
