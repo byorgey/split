@@ -16,3 +16,8 @@ TAGS
 /cabal.config
 /.cabal-sandbox/
 \#*
+
+.stack-work/
+dist-newstyle/
+stack.yaml.lock
+stack.yaml.test
