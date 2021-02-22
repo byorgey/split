@@ -9,7 +9,7 @@ Dependencies:
 
   There are no dependencies other than the base package.
   Data.List.Split has been tested with versions of GHC from 6.8.3 up
-  through 8.0.1.  It is completely Haskell2010 (probably also
+  through 9.0.1.  It is completely Haskell2010 (probably also
   Haskell98) compliant, so it probably builds with other compilers as
   well.
 
