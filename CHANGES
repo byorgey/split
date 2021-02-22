@@ -1,3 +1,7 @@
+* 0.2.3.4-r1 (22 February 2021)
+
+  - Allow base-4.15 for GHC-9.0
+
 * 0.2.3.4 (22 February 2020)
 
   - Allow base-4.14 for GHC-8.10
