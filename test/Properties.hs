@@ -368,7 +368,7 @@ prop_divvy_evenly elems (Positive n) = concat (divvy n n elems') == elems'
   where
     -- Chop off the smallest possible tail of elems to make the length
     -- evenly divisible by n.  This property used to have a
-    -- precondition (length elemens `mod` n == 0), but that led to too
+    -- precondition (length elements `mod` n == 0), but that led to too
     -- many discarded test cases and occasional test suite failures.
     elems' = take ((length elems `div` n) * n) elems
 
