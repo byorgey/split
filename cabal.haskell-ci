@@ -1,0 +1,3 @@
+-- on Linux we can use ghcup to setup (some) of jobs
+-- hvr-ppa latest are 9.0.1 and 8.10.4
+ghcup-jobs: >= 9.2 || > 8.10.4 && < 9.0
