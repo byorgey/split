@@ -267,22 +267,28 @@ split s = map fromElem . postProcess s . splitInternal (delimiter s)
 -- 'defaultSplitter' except for the delimiters.
 
 -- | A splitting strategy that splits on any one of the given
---   elements.  For example:
+--   elements.
 --
--- > split (oneOf "xyz") "aazbxyzcxd" == ["aa","z","b","x","","y","","z","c","x","d"]
+-- >>> split (oneOf ",;") "hi;there,world"
+-- ["hi",";","there",",","world"]
+-- >>> split (oneOf "xyz") "aazbxyzcxd"
+-- ["aa","z","b","x","","y","","z","c","x","d"]
 oneOf :: Eq a => [a] -> Splitter a
 oneOf elts = defaultSplitter {delimiter = Delimiter [(`elem` elts)]}
 
 -- | A splitting strategy that splits on the given list, when it is
 --   encountered as an exact subsequence.  For example:
 --
--- > split (onSublist "xyz") "aazbxyzcxd" == ["aazb","xyz","cxd"]
+-- >>> split (onSublist "xyz") "aazbxyzcxd"
+-- ["aazb","xyz","cxd"]
 --
 --   Note that splitting on the empty list is a special case, which
 --   splits just before every element of the list being split.  For example:
 --
--- > split (onSublist "") "abc" == ["","","a","","b","","c"]
--- > split (dropDelims . dropBlanks $ onSublist "") "abc" == ["a","b","c"]
+-- >>> split (onSublist "") "abc"
+-- ["","","a","","b","","c"]
+-- >>> split (dropDelims . dropBlanks $ onSublist "") "abc"
+-- ["a","b","c"]
 --
 --   However, if you want to break a list into singleton elements like
 --   this, you are better off using @'chunksOf' 1@, or better yet,
@@ -291,9 +297,10 @@ onSublist :: Eq a => [a] -> Splitter a
 onSublist lst = defaultSplitter {delimiter = Delimiter (map (==) lst)}
 
 -- | A splitting strategy that splits on any elements that satisfy the
---   given predicate.  For example:
+--   given predicate.
 --
--- > split (whenElt (<0)) [2,4,-3,6,-9,1] == [[2,4],[-3],[6],[-9],[1]]
+-- >>> split (whenElt (<0)) [2,4,-3,6,-9,1 :: Int]
+-- [[2,4],[-3],[6],[-9],[1]]
 whenElt :: (a -> Bool) -> Splitter a
 whenElt p = defaultSplitter {delimiter = Delimiter [p]}
 
@@ -302,8 +309,10 @@ whenElt p = defaultSplitter {delimiter = Delimiter [p]}
 -- | Drop delimiters from the output (the default is to keep
 --   them). For example,
 --
--- > split (oneOf ":") "a:b:c" == ["a", ":", "b", ":", "c"]
--- > split (dropDelims $ oneOf ":") "a:b:c" == ["a", "b", "c"]
+-- >>> split (oneOf ":") "a:b:c"
+-- ["a",":","b",":","c"]
+-- >>> split (dropDelims $ oneOf ":") "a:b:c"
+-- ["a","b","c"]
 dropDelims :: Splitter a -> Splitter a
 dropDelims s = s {delimPolicy = Drop}
 
