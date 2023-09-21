@@ -188,7 +188,7 @@ doCondense Condense ls = condense' ls
  where
   condense' [] = []
   condense' (c@(Text _) : l) = c : condense' l
-  condense' l = (Delim $ concatMap fromElem ds) : condense' rest
+  condense' l = Delim (concatMap fromElem ds) : condense' rest
    where
     (ds, rest) = span isDelim l
 doCondense _ ls = ls
@@ -627,6 +627,6 @@ chop f as = b : chop f as'
 -- >     where divvyedPrices = divvy 20 1 priceList
 divvy :: Int -> Int -> [a] -> [[a]]
 divvy _ _ [] = []
-divvy n m lst = filter (\ws -> (n == length ws)) choppedl
+divvy n m lst = filter ((n ==) . length) choppedl
  where
   choppedl = chop (\xs -> (take n xs, drop m xs)) lst
