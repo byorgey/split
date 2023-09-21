@@ -1,6 +1,5 @@
 {-# OPTIONS_HADDOCK prune #-}
 
------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.List.Split
 -- Copyright   :  (c) Brent Yorgey, Louis Wasserman 2008-2012
@@ -19,81 +18,70 @@
 -- A git repository containing the source (including a module with
 -- over 40 QuickCheck properties) can be found at
 -- <https://github.com/byorgey/split>.
---
------------------------------------------------------------------------------
 module Data.List.Split (
+  -- * Getting started
+  -- $started
 
-                       -- * Getting started
-                       -- $started
+  -- * Convenience functions
+  -- $conv
+  splitOn,
+  splitOneOf,
+  splitWhen,
+  endBy,
+  endByOneOf,
+  wordsBy,
+  linesBy,
 
-                       -- * Convenience functions
-                       -- $conv
+  -- * Other splitting methods
+  -- $other
+  chunksOf,
+  splitPlaces,
+  splitPlacesBlanks,
+  chop,
+  divvy,
 
-                         splitOn
-                       , splitOneOf
-                       , splitWhen
-                       , endBy
-                       , endByOneOf
+  -- * Splitting combinators
+  -- $comb
+  Splitter,
+  defaultSplitter,
+  split,
 
-                       , wordsBy
-                       , linesBy
+  -- ** Basic strategies
+  -- $basic
+  oneOf,
+  onSublist,
+  whenElt,
 
-                       -- * Other splitting methods
-                       -- $other
-                       , chunksOf
-                       , splitPlaces
-                       , splitPlacesBlanks
-                       , chop
-                       , divvy
+  -- ** Strategy transformers
+  -- $transform
+  dropDelims,
+  keepDelimsL,
+  keepDelimsR,
+  condense,
+  dropInitBlank,
+  dropFinalBlank,
+  dropInnerBlanks,
 
-                       -- * Splitting combinators
-                       -- $comb
+  -- ** Derived combinators
+  -- $derived
+  dropBlanks,
+  startsWith,
+  startsWithOneOf,
+  endsWith,
+  endsWithOneOf,
+  -- The following synonyms are deprecated, but
+  -- still exported for now.  No documentation is
+  -- generated for them via the 'OPTIONS_HADDOCK
+  -- prune' pragma.
 
-                       , Splitter
-                       , defaultSplitter
-                       , split
+  sepBy,
+  sepByOneOf,
+  unintercalate,
+  splitEvery,
+  chunk,
+) where
 
-                       -- ** Basic strategies
-                       -- $basic
-
-                       , oneOf
-                       , onSublist
-                       , whenElt
-
-                       -- ** Strategy transformers
-                       -- $transform
-
-                       , dropDelims
-                       , keepDelimsL
-                       , keepDelimsR
-                       , condense
-                       , dropInitBlank
-                       , dropFinalBlank
-                       , dropInnerBlanks
-
-                       -- ** Derived combinators
-                       -- $derived
-
-                       , dropBlanks
-                       , startsWith
-                       , startsWithOneOf
-                       , endsWith
-                       , endsWithOneOf
-
-                       -- The following synonyms are deprecated, but
-                       -- still exported for now.  No documentation is
-                       -- generated for them via the 'OPTIONS_HADDOCK
-                       -- prune' pragma.
-
-                       , sepBy
-                       , sepByOneOf
-                       , unintercalate
-                       , splitEvery
-                       , chunk
-
-                       ) where
-
-import           Data.List.Split.Internals
+import Data.List.Split.Internals
 
 -- $started
 -- To get started, you should take a look at the functions 'splitOn',
