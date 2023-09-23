@@ -1,2 +1,13 @@
-branches: master ci-*
+-- See cabal.haskell-ci in the tool repository for all field explanations
+-- https://github.com/haskell-CI/haskell-ci/blob/master/cabal.haskell-ci
 
+-- Run cabal-docspec
+docspec: True
+
+-- Build haddocks. Accepts booleans or version range.
+haddock: True
+
+-- Run HLint
+hlint: True
+hlint-job: 9.6.2
+hlint-download-binary: True
