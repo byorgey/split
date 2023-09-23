@@ -271,6 +271,7 @@ split s = map fromElem . postProcess s . splitInternal (delimiter s)
 --
 -- >>> split (oneOf ",;") "hi;there,world"
 -- ["hi",";","there",",","world"]
+--
 -- >>> split (oneOf "xyz") "aazbxyzcxd"
 -- ["aa","z","b","x","","y","","z","c","x","d"]
 oneOf :: (Eq a) => [a] -> Splitter a
@@ -287,6 +288,7 @@ oneOf elts = defaultSplitter {delimiter = Delimiter [(`elem` elts)]}
 --
 -- >>> split (onSublist "") "abc"
 -- ["","","a","","b","","c"]
+--
 -- >>> split (dropDelims . dropBlanks $ onSublist "") "abc"
 -- ["a","b","c"]
 --
@@ -311,6 +313,7 @@ whenElt p = defaultSplitter {delimiter = Delimiter [p]}
 --
 -- >>> split (oneOf ":") "a:b:c"
 -- ["a",":","b",":","c"]
+--
 -- >>> split (dropDelims $ oneOf ":") "a:b:c"
 -- ["a","b","c"]
 dropDelims :: Splitter a -> Splitter a
@@ -336,8 +339,10 @@ keepDelimsR s = s {delimPolicy = KeepRight}
 --
 -- >>> split (condense $ oneOf "xyz") "aazbxyzcxd"
 -- ["aa","z","b","xyz","c","x","d"]
+--
 -- >>> split (dropDelims $ oneOf "xyz") "aazbxyzcxd"
 -- ["aa","b","","","c","d"]
+--
 -- >>> split (condense . dropDelims $ oneOf "xyz") "aazbxyzcxd"
 -- ["aa","b","c","d"]
 condense :: Splitter a -> Splitter a
@@ -348,6 +353,7 @@ condense s = s {condensePolicy = Condense}
 --
 -- >>> split (oneOf ":") ":a:b"
 -- ["",":","a",":","b"]
+--
 -- >>> split (dropInitBlank $ oneOf ":") ":a:b"
 -- [":","a",":","b"]
 dropInitBlank :: Splitter a -> Splitter a
@@ -357,6 +363,7 @@ dropInitBlank s = s {initBlankPolicy = DropBlank}
 --
 -- >>> split (oneOf ":") "a:b:"
 -- ["a",":","b",":",""]
+--
 -- >>> split (dropFinalBlank $ oneOf ":") "a:b:"
 -- ["a",":","b",":"]
 dropFinalBlank :: Splitter a -> Splitter a
@@ -366,6 +373,7 @@ dropFinalBlank s = s {finalBlankPolicy = DropBlank}
 --
 -- >>> split (oneOf ":") "::b:::a"
 -- ["",":","",":","b",":","",":","",":","a"]
+--
 -- >>> split (dropInnerBlanks $ oneOf ":") "::b:::a"
 -- ["",":",":","b",":",":",":","a"]
 dropInnerBlanks :: Splitter a -> Splitter a
@@ -379,6 +387,7 @@ dropInnerBlanks s = s {condensePolicy = DropBlankFields}
 --
 -- >>> split (oneOf ":") "::b:::a"
 -- ["",":","",":","b",":","",":","",":","a"]
+--
 -- >>> split (dropBlanks $ oneOf ":") "::b:::a"
 -- ["::","b",":::","a"]
 dropBlanks :: Splitter a -> Splitter a
