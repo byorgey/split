@@ -9,5 +9,5 @@ haddock: True
 
 -- Run HLint
 hlint: True
-hlint-job: 9.6.2
+hlint-job: 9.4.5
 hlint-download-binary: True
