@@ -90,23 +90,23 @@ import Data.List.Split.Internals
 -- functions implement various common splitting operations, and one of
 -- them will probably do the job 90\% of the time.  For example:
 --
--- > > splitOn "x" "axbxc"
--- > ["a","b","c"]
--- >
--- > > splitOn "x" "axbxcx"
--- > ["a","b","c",""]
--- >
--- > > endBy ";" "foo;bar;baz;"
--- > ["foo","bar","baz"]
--- >
--- > > splitWhen (<0) [1,3,-4,5,7,-9,0,2]
--- > [[1,3],[5,7],[0,2]]
--- >
--- > > splitOneOf ";.," "foo,bar;baz.glurk"
--- > ["foo","bar","baz","glurk"]
--- >
--- > > chunksOf 3 ['a'..'z']
--- > ["abc","def","ghi","jkl","mno","pqr","stu","vwx","yz"]
+-- >>> splitOn "x" "axbxc"
+-- ["a","b","c"]
+--
+-- >>> splitOn "x" "axbxcx"
+-- ["a","b","c",""]
+--
+-- >>> endBy ";" "foo;bar;baz;"
+-- ["foo","bar","baz"]
+--
+-- >>> splitWhen (<0) [1,3,-4,5,7,-9,0,2]
+-- [[1,3],[5,7],[0,2]]
+--
+-- >>> splitOneOf ";.," "foo,bar;baz.glurk"
+-- ["foo","bar","baz","glurk"]
+--
+-- >>> chunksOf 3 ['a'..'z']
+-- ["abc","def","ghi","jkl","mno","pqr","stu","vwx","yz"]
 --
 -- If you want more flexibility, however, you can use the combinator
 -- library in terms of which these functions are defined.  For more
@@ -136,8 +136,8 @@ import Data.List.Split.Internals
 -- suitable 'Splitter' has been created, it can be run with the
 -- 'split' function.  For example:
 --
--- > > split (dropBlanks . condense $ whenElt (<0)) [1,2,4,-5,-6,4,9,-19,-30]
--- > [[1,2,4],[-5,-6],[4,9],[-19,-30]]
+-- >>> split (dropBlanks . condense $ whenElt (<0)) [1,2,4,-5,-6,4,9,-19,-30]
+-- [[1,2,4],[-5,-6],[4,9],[-19,-30]]
 
 -- $basic
 -- All these basic strategies have the same parameters as the

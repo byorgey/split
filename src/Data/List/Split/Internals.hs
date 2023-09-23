@@ -273,17 +273,17 @@ split s = map fromElem . postProcess s . splitInternal (delimiter s)
 -- ["hi",";","there",",","world"]
 -- >>> split (oneOf "xyz") "aazbxyzcxd"
 -- ["aa","z","b","x","","y","","z","c","x","d"]
-oneOf :: Eq a => [a] -> Splitter a
+oneOf :: (Eq a) => [a] -> Splitter a
 oneOf elts = defaultSplitter {delimiter = Delimiter [(`elem` elts)]}
 
 -- | A splitting strategy that splits on the given list, when it is
---   encountered as an exact subsequence.  For example:
+--   encountered as an exact subsequence.
 --
 -- >>> split (onSublist "xyz") "aazbxyzcxd"
 -- ["aazb","xyz","cxd"]
 --
 --   Note that splitting on the empty list is a special case, which
---   splits just before every element of the list being split.  For example:
+--   splits just before every element of the list being split.
 --
 -- >>> split (onSublist "") "abc"
 -- ["","","a","","b","","c"]
@@ -293,7 +293,7 @@ oneOf elts = defaultSplitter {delimiter = Delimiter [(`elem` elts)]}
 --   However, if you want to break a list into singleton elements like
 --   this, you are better off using @'chunksOf' 1@, or better yet,
 --   @'map' (:[])@.
-onSublist :: Eq a => [a] -> Splitter a
+onSublist :: (Eq a) => [a] -> Splitter a
 onSublist lst = defaultSplitter {delimiter = Delimiter (map (==) lst)}
 
 -- | A splitting strategy that splits on any elements that satisfy the
@@ -307,7 +307,7 @@ whenElt p = defaultSplitter {delimiter = Delimiter [p]}
 -- ** Strategy transformers
 
 -- | Drop delimiters from the output (the default is to keep
---   them). For example,
+--   them).
 --
 -- >>> split (oneOf ":") "a:b:c"
 -- ["a",":","b",":","c"]
@@ -317,48 +317,57 @@ dropDelims :: Splitter a -> Splitter a
 dropDelims s = s {delimPolicy = Drop}
 
 -- | Keep delimiters in the output by prepending them to adjacent
---   chunks.  For example:
+--   chunks.
 --
--- > split (keepDelimsL $ oneOf "xyz") "aazbxyzcxd" == ["aa","zb","x","y","zc","xd"]
+-- >>> split (keepDelimsL $ oneOf "xyz") "aazbxyzcxd"
+-- ["aa","zb","x","y","zc","xd"]
 keepDelimsL :: Splitter a -> Splitter a
 keepDelimsL s = s {delimPolicy = KeepLeft}
 
 -- | Keep delimiters in the output by appending them to adjacent
---   chunks. For example:
+--   chunks.
 --
--- > split (keepDelimsR $ oneOf "xyz") "aazbxyzcxd" == ["aaz","bx","y","z","cx","d"]
+-- >>> split (keepDelimsR $ oneOf "xyz") "aazbxyzcxd"
+-- ["aaz","bx","y","z","cx","d"]
 keepDelimsR :: Splitter a -> Splitter a
 keepDelimsR s = s {delimPolicy = KeepRight}
 
--- | Condense multiple consecutive delimiters into one.  For example:
+-- | Condense multiple consecutive delimiters into one.
 --
--- > split (condense $ oneOf "xyz") "aazbxyzcxd" == ["aa","z","b","xyz","c","x","d"]
--- > split (dropDelims $ oneOf "xyz") "aazbxyzcxd" == ["aa","b","","","c","d"]
--- > split (condense . dropDelims $ oneOf "xyz") "aazbxyzcxd" == ["aa","b","c","d"]
+-- >>> split (condense $ oneOf "xyz") "aazbxyzcxd"
+-- ["aa","z","b","xyz","c","x","d"]
+-- >>> split (dropDelims $ oneOf "xyz") "aazbxyzcxd"
+-- ["aa","b","","","c","d"]
+-- >>> split (condense . dropDelims $ oneOf "xyz") "aazbxyzcxd"
+-- ["aa","b","c","d"]
 condense :: Splitter a -> Splitter a
 condense s = s {condensePolicy = Condense}
 
 -- | Don't generate a blank chunk if there is a delimiter at the
---   beginning.  For example:
+--   beginning.
 --
--- > split (oneOf ":") ":a:b" == ["",":","a",":","b"]
--- > split (dropInitBlank $ oneOf ":") ":a:b" == [":","a",":","b"]
+-- >>> split (oneOf ":") ":a:b"
+-- ["",":","a",":","b"]
+-- >>> split (dropInitBlank $ oneOf ":") ":a:b"
+-- [":","a",":","b"]
 dropInitBlank :: Splitter a -> Splitter a
 dropInitBlank s = s {initBlankPolicy = DropBlank}
 
 -- | Don't generate a blank chunk if there is a delimiter at the end.
---   For example:
 --
--- > split (oneOf ":") "a:b:" == ["a",":","b",":",""]
--- > split (dropFinalBlank $ oneOf ":") "a:b:" == ["a",":","b",":"]
+-- >>> split (oneOf ":") "a:b:"
+-- ["a",":","b",":",""]
+-- >>> split (dropFinalBlank $ oneOf ":") "a:b:"
+-- ["a",":","b",":"]
 dropFinalBlank :: Splitter a -> Splitter a
 dropFinalBlank s = s {finalBlankPolicy = DropBlank}
 
 -- | Don't generate blank chunks between consecutive delimiters.
---   For example:
 --
--- > split (oneOf ":") "::b:::a" == ["",":","",":","b",":","",":","",":","a"]
--- > split (dropInnerBlanks $ oneOf ":") "::b:::a" == ["", ":",":","b",":",":",":","a"]
+-- >>> split (oneOf ":") "::b:::a"
+-- ["",":","",":","b",":","",":","",":","a"]
+-- >>> split (dropInnerBlanks $ oneOf ":") "::b:::a"
+-- ["",":",":","b",":",":",":","a"]
 dropInnerBlanks :: Splitter a -> Splitter a
 dropInnerBlanks s = s {condensePolicy = DropBlankFields}
 
@@ -366,66 +375,67 @@ dropInnerBlanks s = s {condensePolicy = DropBlankFields}
 
 -- | Drop all blank chunks from the output, and condense consecutive
 --   delimiters into one.  Equivalent to @'dropInitBlank'
---   . 'dropFinalBlank' . 'condense'@.  For example:
+--   . 'dropFinalBlank' . 'condense'@.
 --
--- > split (oneOf ":") "::b:::a" == ["",":","",":","b",":","",":","",":","a"]
--- > split (dropBlanks $ oneOf ":") "::b:::a" == ["::","b",":::","a"]
+-- >>> split (oneOf ":") "::b:::a"
+-- ["",":","",":","b",":","",":","",":","a"]
+-- >>> split (dropBlanks $ oneOf ":") "::b:::a"
+-- ["::","b",":::","a"]
 dropBlanks :: Splitter a -> Splitter a
 dropBlanks = dropInitBlank . dropFinalBlank . condense
 
 -- | Make a strategy that splits a list into chunks that all start
 --   with the given subsequence (except possibly the first).
 --   Equivalent to @'dropInitBlank' . 'keepDelimsL' . 'onSublist'@.
---   For example:
 --
--- > split (startsWith "app") "applyapplicativeapplaudapproachapple" == ["apply","applicative","applaud","approach","apple"]
-startsWith :: Eq a => [a] -> Splitter a
+-- >>> split (startsWith "app") "applyapplicativeapplaudapproachapple"
+-- ["apply","applicative","applaud","approach","apple"]
+startsWith :: (Eq a) => [a] -> Splitter a
 startsWith = dropInitBlank . keepDelimsL . onSublist
 
 -- | Make a strategy that splits a list into chunks that all start
 --   with one of the given elements (except possibly the first).
---   Equivalent to @'dropInitBlank' . 'keepDelimsL' . 'oneOf'@.  For
+--   Equivalent to @'dropInitBlank' . 'keepDelimsL' . 'oneOf'@.
 --   example:
 --
--- > split (startsWithOneOf ['A'..'Z']) "ACamelCaseIdentifier" == ["A","Camel","Case","Identifier"]
-startsWithOneOf :: Eq a => [a] -> Splitter a
+-- >>> split (startsWithOneOf ['A'..'Z']) "ACamelCaseIdentifier"
+-- ["A","Camel","Case","Identifier"]
+startsWithOneOf :: (Eq a) => [a] -> Splitter a
 startsWithOneOf = dropInitBlank . keepDelimsL . oneOf
 
 -- | Make a strategy that splits a list into chunks that all end with
 --   the given subsequence, except possibly the last.  Equivalent to
---   @'dropFinalBlank' . 'keepDelimsR' . 'onSublist'@.  For example:
+--   @'dropFinalBlank' . 'keepDelimsR' . 'onSublist'@.
 --
--- > split (endsWith "ly") "happilyslowlygnarlylily" == ["happily","slowly","gnarly","lily"]
-endsWith :: Eq a => [a] -> Splitter a
+-- >>> split (endsWith "ly") "happilyslowlygnarlylily"
+-- ["happily","slowly","gnarly","lily"]
+endsWith :: (Eq a) => [a] -> Splitter a
 endsWith = dropFinalBlank . keepDelimsR . onSublist
 
 -- | Make a strategy that splits a list into chunks that all end with
 --   one of the given elements, except possibly the last.  Equivalent
---   to @'dropFinalBlank' . 'keepDelimsR' . 'oneOf'@.  For example:
+--   to @'dropFinalBlank' . 'keepDelimsR' . 'oneOf'@.
 --
--- > split (condense $ endsWithOneOf ".,?! ") "Hi, there!  How are you?" == ["Hi, ","there!  ","How ","are ","you?"]
-endsWithOneOf :: Eq a => [a] -> Splitter a
+-- >>> split (condense $ endsWithOneOf ".,?! ") "Hi, there!  How are you?"
+-- ["Hi, ","there!  ","How ","are ","you?"]
+endsWithOneOf :: (Eq a) => [a] -> Splitter a
 endsWithOneOf = dropFinalBlank . keepDelimsR . oneOf
 
 -- ** Convenience functions
 
---
--- These functions implement some common splitting strategies.  Note
--- that all of the functions in this section drop delimiters from
--- the final output, since that is a more common use case even
--- though it is not the default.
-
 -- | Split on any of the given elements.  Equivalent to @'split'
---   . 'dropDelims' . 'oneOf'@.  For example:
+--   . 'dropDelims' . 'oneOf'@.
 --
--- > splitOneOf ";.," "foo,bar;baz.glurk" == ["foo","bar","baz","glurk"]
-splitOneOf :: Eq a => [a] -> [a] -> [[a]]
+-- >>> splitOneOf ";.," "foo,bar;baz.glurk"
+-- ["foo","bar","baz","glurk"]
+splitOneOf :: (Eq a) => [a] -> [a] -> [[a]]
 splitOneOf = split . dropDelims . oneOf
 
 -- | Split on the given sublist.  Equivalent to @'split'
---   . 'dropDelims' . 'onSublist'@.  For example:
+--   . 'dropDelims' . 'onSublist'@.
 --
--- > splitOn ".." "a..b...c....d.." == ["a","b",".c","","d",""]
+-- >>> splitOn ".." "a..b...c....d.."
+-- ["a","b",".c","","d",""]
 --
 --   In some parsing combinator frameworks this is also known as
 --   @sepBy@.
@@ -433,68 +443,78 @@ splitOneOf = split . dropDelims . oneOf
 --   Note that this is the right inverse of the 'Data.List.intercalate' function
 --   from "Data.List", that is,
 --
---   > intercalate x . splitOn x === id
+-- @
+-- intercalate x . splitOn x === id
+-- @
 --
 --   @'splitOn' x . 'Data.List.intercalate' x@ is the identity on
 --   certain lists, but it is tricky to state the precise conditions
 --   under which this holds.  (For example, it is not enough to say
 --   that @x@ does not occur in any elements of the input list.
 --   Working out why is left as an exercise for the reader.)
-splitOn :: Eq a => [a] -> [a] -> [[a]]
+splitOn :: (Eq a) => [a] -> [a] -> [[a]]
 splitOn = split . dropDelims . onSublist
 
 -- | Split on elements satisfying the given predicate.  Equivalent to
---   @'split' . 'dropDelims' . 'whenElt'@.  For example:
+--   @'split' . 'dropDelims' . 'whenElt'@.
 --
--- > splitWhen (<0) [1,3,-4,5,7,-9,0,2] == [[1,3],[5,7],[0,2]]
+-- >>> splitWhen (<0) [1,3,-4,5,7,-9,0,2]
+-- [[1,3],[5,7],[0,2]]
+--
+-- >>> splitWhen (<0) [1,-2,3,4,-5,-6,7,8,-9]
+-- [[1],[3,4],[],[7,8],[]]
 splitWhen :: (a -> Bool) -> [a] -> [[a]]
 splitWhen = split . dropDelims . whenElt
 
 {-# DEPRECATED sepBy "Use splitOn." #-}
-sepBy :: Eq a => [a] -> [a] -> [[a]]
+sepBy :: (Eq a) => [a] -> [a] -> [[a]]
 sepBy = splitOn
 
 {-# DEPRECATED sepByOneOf "Use splitOneOf." #-}
-sepByOneOf :: Eq a => [a] -> [a] -> [[a]]
+sepByOneOf :: (Eq a) => [a] -> [a] -> [[a]]
 sepByOneOf = splitOneOf
 
 -- | Split into chunks terminated by the given subsequence.
 --   Equivalent to @'split' . 'dropFinalBlank' . 'dropDelims'
---   . 'onSublist'@.  For example:
+--   . 'onSublist'@.
 --
--- > endBy ";" "foo;bar;baz;" == ["foo","bar","baz"]
+-- >>> endBy ";" "foo;bar;baz;"
+-- ["foo","bar","baz"]
 --
 --   Note also that the 'lines' function from "Data.List" is equivalent
 --   to @'endBy' \"\\n\"@.
-endBy :: Eq a => [a] -> [a] -> [[a]]
+endBy :: (Eq a) => [a] -> [a] -> [[a]]
 endBy = split . dropFinalBlank . dropDelims . onSublist
 
 -- | Split into chunks terminated by one of the given elements.
 --   Equivalent to @'split' . 'dropFinalBlank' . 'dropDelims'
---   . 'oneOf'@. For example:
+--   . 'oneOf'@.
 --
--- > endByOneOf ";," "foo;bar,baz;" == ["foo","bar","baz"]
-endByOneOf :: Eq a => [a] -> [a] -> [[a]]
+-- >>> endByOneOf ";," "foo;bar,baz;"
+-- ["foo","bar","baz"]
+endByOneOf :: (Eq a) => [a] -> [a] -> [[a]]
 endByOneOf = split . dropFinalBlank . dropDelims . oneOf
 
 {-# DEPRECATED unintercalate "Use splitOn." #-}
-unintercalate :: Eq a => [a] -> [a] -> [[a]]
+unintercalate :: (Eq a) => [a] -> [a] -> [[a]]
 unintercalate = splitOn
 
 -- | Split into \"words\", with word boundaries indicated by the given
 --   predicate.  Satisfies @'Data.List.words' === wordsBy
 --   'Data.Char.isSpace'@; equivalent to @'split' . 'dropBlanks'
---   . 'dropDelims' . 'whenElt'@.  For example:
+--   . 'dropDelims' . 'whenElt'@.
 --
--- > wordsBy (=='x') "dogxxxcatxbirdxx" == ["dog","cat","bird"]
+-- >>> wordsBy (=='x') "dogxxxcatxbirdxx"
+-- ["dog","cat","bird"]
 wordsBy :: (a -> Bool) -> [a] -> [[a]]
 wordsBy = split . dropBlanks . dropDelims . whenElt
 
 -- | Split into \"lines\", with line boundaries indicated by the given
 --   predicate. Satisfies @'lines' === linesBy (=='\n')@; equivalent to
---   @'split' . 'dropFinalBlank' . 'dropDelims' . 'whenElt'@.  For example:
+--   @'split' . 'dropFinalBlank' . 'dropDelims' . 'whenElt'@.
 --
--- > linesBy (=='x') "dogxxxcatxbirdxx" == ["dog","","","cat","bird",""]
+-- >>> linesBy (=='x') "dogxxxcatxbirdxx"
+-- ["dog","","","cat","bird",""]
 linesBy :: (a -> Bool) -> [a] -> [[a]]
 linesBy = split . dropFinalBlank . dropDelims . whenElt
 
@@ -524,7 +544,16 @@ build g = g (:) []
 -- | @'chunksOf' n@ splits a list into length-n pieces.  The last
 --   piece will be shorter if @n@ does not evenly divide the length of
 --   the list.  If @n <= 0@, @'chunksOf' n l@ returns an infinite list
---   of empty lists.  For example:
+--   of empty lists.
+--
+-- >>> chunksOf 3 [1..12]
+-- [[1,2,3],[4,5,6],[7,8,9],[10,11,12]]
+--
+-- >>> chunksOf 3 "Hello there"
+-- ["Hel","lo ","the","re"]
+--
+-- >>> chunksOf 3 ([] :: [Int])
+-- []
 --
 --   Note that @'chunksOf' n []@ is @[]@, not @[[]]@.  This is
 --   intentional, and is consistent with a recursive definition of
@@ -548,21 +577,26 @@ chunk = chunksOf
 splitEvery :: Int -> [e] -> [[e]]
 splitEvery = chunksOf
 
--- | Split a list into chunks of the given lengths. For example:
+-- | Split a list into chunks of the given lengths.
 --
--- > splitPlaces [2,3,4] [1..20] == [[1,2],[3,4,5],[6,7,8,9]]
--- > splitPlaces [4,9] [1..10] == [[1,2,3,4],[5,6,7,8,9,10]]
--- > splitPlaces [4,9,3] [1..10] == [[1,2,3,4],[5,6,7,8,9,10]]
+-- >>> splitPlaces [2,3,4] [1..20]
+-- [[1,2],[3,4,5],[6,7,8,9]]
+--
+-- >>> splitPlaces [4,9] [1..10]
+-- [[1,2,3,4],[5,6,7,8,9,10]]
+--
+-- >>> splitPlaces [4,9,3] [1..10]
+-- [[1,2,3,4],[5,6,7,8,9,10]]
 --
 --   If the input list is longer than the total of the given lengths,
 --   then the remaining elements are dropped. If the list is shorter
 --   than the total of the given lengths, then the result may contain
 --   fewer chunks than requested, and the last chunk may be shorter
 --   than requested.
-splitPlaces :: Integral a => [a] -> [e] -> [[e]]
+splitPlaces :: (Integral a) => [a] -> [e] -> [[e]]
 splitPlaces is ys = build (splitPlacer is ys)
  where
-  splitPlacer :: Integral i => [i] -> [b] -> ([b] -> t -> t) -> t -> t
+  splitPlacer :: (Integral i) => [i] -> [b] -> ([b] -> t -> t) -> t -> t
   splitPlacer [] _ _ n = n
   splitPlacer _ [] _ n = n
   splitPlacer (l : ls) xs c n =
@@ -575,18 +609,23 @@ splitPlaces is ys = build (splitPlacer is ys)
 --   total of the given lengths, then the remaining elements are
 --   dropped. If the list is shorter than the total of the given
 --   lengths, then the last several chunks will be shorter than
---   requested or empty. For example:
+--   requested or empty.
 --
--- > splitPlacesBlanks [2,3,4] [1..20] == [[1,2],[3,4,5],[6,7,8,9]]
--- > splitPlacesBlanks [4,9] [1..10] == [[1,2,3,4],[5,6,7,8,9,10]]
--- > splitPlacesBlanks [4,9,3] [1..10] == [[1,2,3,4],[5,6,7,8,9,10],[]]
+-- >>> splitPlacesBlanks [2,3,4] [1..20]
+-- [[1,2],[3,4,5],[6,7,8,9]]
+--
+-- >>> splitPlacesBlanks [4,9] [1..10]
+-- [[1,2,3,4],[5,6,7,8,9,10]]
+--
+-- >>> splitPlacesBlanks [4,9,3] [1..10]
+-- [[1,2,3,4],[5,6,7,8,9,10],[]]
 --
 --   Notice the empty list in the output of the third example, which
 --   differs from the behavior of 'splitPlaces'.
-splitPlacesBlanks :: Integral a => [a] -> [e] -> [[e]]
+splitPlacesBlanks :: (Integral a) => [a] -> [e] -> [[e]]
 splitPlacesBlanks is ys = build (splitPlacer is ys)
  where
-  splitPlacer :: Integral i => [i] -> [b] -> ([b] -> t -> t) -> t -> t
+  splitPlacer :: (Integral i) => [i] -> [b] -> ([b] -> t -> t) -> t -> t
   splitPlacer [] _ _ n = n
   splitPlacer (l : ls) xs c n =
     let (x1, x2) = genericSplitAt l xs
@@ -604,7 +643,7 @@ splitPlacesBlanks is ys = build (splitPlacer is ys)
 -- > group = chop (\ xs@(x:_) -> span (==x) xs)
 -- >
 -- > words :: String -> [String]
--- > words = filter (not . null) . chop (span (not . isSpace) . dropWhile isSpace)
+-- > words = filter (not . null) . chop (break isSpace . dropWhile isSpace)
 chop :: ([a] -> (b, [a])) -> [a] -> [b]
 chop _ [] = []
 chop f as = b : chop f as'
@@ -615,12 +654,17 @@ chop f as = b : chop f as'
 --   input specifications you provide. Each sublist will have 'n' items, and the
 --   start of each sublist will be offset by 'm' items from the previous one.
 --
--- > divvy 5 5 [1..20] == [[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15],[16,17,18,19,20]]
+-- >>> divvy 5 5 [1..15]
+-- [[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15]]
+--
+-- >>> divvy 5 2 [1..15]
+-- [[1,2,3,4,5],[3,4,5,6,7],[5,6,7,8,9],[7,8,9,10,11],[9,10,11,12,13],[11,12,13,14,15]]
 --
 --   In the case where a source list's trailing elements do no fill an entire
 --   sublist, those trailing elements will be dropped.
 --
--- > divvy 5 2 [1..10] == [[1,2,3,4,5],[3,4,5,6,7],[5,6,7,8,9]]
+-- >>> divvy 5 2 [1..10]
+-- [[1,2,3,4,5],[3,4,5,6,7],[5,6,7,8,9]]
 --
 --   As an example, you can generate a moving average over a list of prices:
 --
@@ -631,9 +675,7 @@ chop f as = b : chop f as'
 -- > average xs = sum xs / (fromIntegral $ length xs)
 -- >
 -- > simpleMovingAverage :: Prices -> AveragePrices
--- > simpleMovingAverage priceList =
--- >   map average divvyedPrices
--- >     where divvyedPrices = divvy 20 1 priceList
+-- > simpleMovingAverage = map average . divvy 20 1
 divvy :: Int -> Int -> [a] -> [[a]]
 divvy _ _ [] = []
 divvy n m lst = filter ((n ==) . length) choppedl
