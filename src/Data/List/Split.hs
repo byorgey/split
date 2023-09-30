@@ -1,6 +1,5 @@
 {-# OPTIONS_HADDOCK prune #-}
 
------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.List.Split
 -- Copyright   :  (c) Brent Yorgey, Louis Wasserman 2008-2012
@@ -19,81 +18,70 @@
 -- A git repository containing the source (including a module with
 -- over 40 QuickCheck properties) can be found at
 -- <https://github.com/byorgey/split>.
---
------------------------------------------------------------------------------
 module Data.List.Split (
+  -- * Getting started
+  -- $started
 
-                       -- * Getting started
-                       -- $started
+  -- * Convenience functions
+  -- $conv
+  splitOn,
+  splitOneOf,
+  splitWhen,
+  endBy,
+  endByOneOf,
+  wordsBy,
+  linesBy,
 
-                       -- * Convenience functions
-                       -- $conv
+  -- * Other splitting methods
+  -- $other
+  chunksOf,
+  splitPlaces,
+  splitPlacesBlanks,
+  chop,
+  divvy,
 
-                         splitOn
-                       , splitOneOf
-                       , splitWhen
-                       , endBy
-                       , endByOneOf
+  -- * Splitting combinators
+  -- $comb
+  Splitter,
+  defaultSplitter,
+  split,
 
-                       , wordsBy
-                       , linesBy
+  -- ** Basic strategies
+  -- $basic
+  oneOf,
+  onSublist,
+  whenElt,
 
-                       -- * Other splitting methods
-                       -- $other
-                       , chunksOf
-                       , splitPlaces
-                       , splitPlacesBlanks
-                       , chop
-                       , divvy
+  -- ** Strategy transformers
+  -- $transform
+  dropDelims,
+  keepDelimsL,
+  keepDelimsR,
+  condense,
+  dropInitBlank,
+  dropFinalBlank,
+  dropInnerBlanks,
 
-                       -- * Splitting combinators
-                       -- $comb
+  -- ** Derived combinators
+  -- $derived
+  dropBlanks,
+  startsWith,
+  startsWithOneOf,
+  endsWith,
+  endsWithOneOf,
+  -- The following synonyms are deprecated, but
+  -- still exported for now.  No documentation is
+  -- generated for them via the 'OPTIONS_HADDOCK
+  -- prune' pragma.
 
-                       , Splitter
-                       , defaultSplitter
-                       , split
+  sepBy,
+  sepByOneOf,
+  unintercalate,
+  splitEvery,
+  chunk,
+) where
 
-                       -- ** Basic strategies
-                       -- $basic
-
-                       , oneOf
-                       , onSublist
-                       , whenElt
-
-                       -- ** Strategy transformers
-                       -- $transform
-
-                       , dropDelims
-                       , keepDelimsL
-                       , keepDelimsR
-                       , condense
-                       , dropInitBlank
-                       , dropFinalBlank
-                       , dropInnerBlanks
-
-                       -- ** Derived combinators
-                       -- $derived
-
-                       , dropBlanks
-                       , startsWith
-                       , startsWithOneOf
-                       , endsWith
-                       , endsWithOneOf
-
-                       -- The following synonyms are deprecated, but
-                       -- still exported for now.  No documentation is
-                       -- generated for them via the 'OPTIONS_HADDOCK
-                       -- prune' pragma.
-
-                       , sepBy
-                       , sepByOneOf
-                       , unintercalate
-                       , splitEvery
-                       , chunk
-
-                       ) where
-
-import           Data.List.Split.Internals
+import Data.List.Split.Internals
 
 -- $started
 -- To get started, you should take a look at the functions 'splitOn',
@@ -102,23 +90,23 @@ import           Data.List.Split.Internals
 -- functions implement various common splitting operations, and one of
 -- them will probably do the job 90\% of the time.  For example:
 --
--- > > splitOn "x" "axbxc"
--- > ["a","b","c"]
--- >
--- > > splitOn "x" "axbxcx"
--- > ["a","b","c",""]
--- >
--- > > endBy ";" "foo;bar;baz;"
--- > ["foo","bar","baz"]
--- >
--- > > splitWhen (<0) [1,3,-4,5,7,-9,0,2]
--- > [[1,3],[5,7],[0,2]]
--- >
--- > > splitOneOf ";.," "foo,bar;baz.glurk"
--- > ["foo","bar","baz","glurk"]
--- >
--- > > chunksOf 3 ['a'..'z']
--- > ["abc","def","ghi","jkl","mno","pqr","stu","vwx","yz"]
+-- >>> splitOn "x" "axbxc"
+-- ["a","b","c"]
+--
+-- >>> splitOn "x" "axbxcx"
+-- ["a","b","c",""]
+--
+-- >>> endBy ";" "foo;bar;baz;"
+-- ["foo","bar","baz"]
+--
+-- >>> splitWhen (<0) [1,3,-4,5,7,-9,0,2]
+-- [[1,3],[5,7],[0,2]]
+--
+-- >>> splitOneOf ";.," "foo,bar;baz.glurk"
+-- ["foo","bar","baz","glurk"]
+--
+-- >>> chunksOf 3 ['a'..'z']
+-- ["abc","def","ghi","jkl","mno","pqr","stu","vwx","yz"]
 --
 -- If you want more flexibility, however, you can use the combinator
 -- library in terms of which these functions are defined.  For more
@@ -148,8 +136,8 @@ import           Data.List.Split.Internals
 -- suitable 'Splitter' has been created, it can be run with the
 -- 'split' function.  For example:
 --
--- > > split (dropBlanks . condense $ whenElt (<0)) [1,2,4,-5,-6,4,9,-19,-30]
--- > [[1,2,4],[-5,-6],[4,9],[-19,-30]]
+-- >>> split (dropBlanks . condense $ whenElt (<0)) [1,2,4,-5,-6,4,9,-19,-30]
+-- [[1,2,4],[-5,-6],[4,9],[-19,-30]]
 
 -- $basic
 -- All these basic strategies have the same parameters as the
