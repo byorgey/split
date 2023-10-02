@@ -1,3 +1,9 @@
+[![Build Status][build-status]][actions]
+[![split release on Hackage][hackage-img]][hackage]
+
+[build-status]: https://github.com/byorgey/split/actions/workflows/haskell-ci.yml/badge.svg
+[hackage-img]: https://img.shields.io/hackage/v/split.svg?logo=haskell
+
 List splitting
 ==============
 
