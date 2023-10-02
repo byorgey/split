@@ -1,3 +1,9 @@
+* 0.2.4 (2 October 2023)
+
+  - Test with GHC 9.6.
+  - Change examples to doctests (+ add a few more), and check them as part of CI.
+  - Fix up a bunch of style hints.
+
 * 0.2.3.5 (11 August 2022)
 
   - Change base upper bound to < 5.
