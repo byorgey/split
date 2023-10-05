@@ -443,6 +443,15 @@ splitOneOf = split . dropDelims . oneOf
 -- | Split on the given sublist.  Equivalent to @'split'
 --   . 'dropDelims' . 'onSublist'@.
 --
+-- >>> splitOn ":" "12:35:07"
+-- ["12","35","07"]
+--
+-- >>> splitOn "x" "axbxc"
+-- ["a","b","c"]
+--
+-- >>> splitOn "x" "axbxcx"
+-- ["a","b","c",""]
+--
 -- >>> splitOn ".." "a..b...c....d.."
 -- ["a","b",".c","","d",""]
 --
@@ -487,7 +496,7 @@ sepByOneOf = splitOneOf
 --   Equivalent to @'split' . 'dropFinalBlank' . 'dropDelims'
 --   . 'onSublist'@.
 --
--- >>> endBy ";" "foo;bar;baz;"
+-- >>> endBy ".;" "foo.;bar.;baz.;"
 -- ["foo","bar","baz"]
 --
 --   Note also that the 'lines' function from "Data.List" is equivalent
@@ -513,6 +522,9 @@ unintercalate = splitOn
 --   'Data.Char.isSpace'@; equivalent to @'split' . 'dropBlanks'
 --   . 'dropDelims' . 'whenElt'@.
 --
+-- >>> wordsBy (`elem` ",;.?! ") "Hello there, world! How?"
+-- ["Hello","there","world","How"]
+--
 -- >>> wordsBy (=='x') "dogxxxcatxbirdxx"
 -- ["dog","cat","bird"]
 wordsBy :: (a -> Bool) -> [a] -> [[a]]
@@ -521,6 +533,9 @@ wordsBy = split . dropBlanks . dropDelims . whenElt
 -- | Split into \"lines\", with line boundaries indicated by the given
 --   predicate. Satisfies @'lines' === linesBy (=='\n')@; equivalent to
 --   @'split' . 'dropFinalBlank' . 'dropDelims' . 'whenElt'@.
+--
+-- >>> linesBy (==';') "foo;bar;;baz;"
+-- ["foo","bar","","baz"]
 --
 -- >>> linesBy (=='x') "dogxxxcatxbirdxx"
 -- ["dog","","","cat","bird",""]
@@ -565,8 +580,7 @@ build g = g (:) []
 -- []
 --
 --   Note that @'chunksOf' n []@ is @[]@, not @[[]]@.  This is
---   intentional, and is consistent with a recursive definition of
---   'chunksOf'; it satisfies the property that
+--   intentional, and satisfies the property that
 --
 --   @chunksOf n xs ++ chunksOf n ys == chunksOf n (xs ++ ys)@
 --
