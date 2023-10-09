@@ -1,4 +1,4 @@
-* 0.2.4 (2 October 2023)
+* 0.2.4 (9 October 2023)
 
   - Test with GHC 9.6.
   - Change examples to doctests (+ add a few more), and check them as part of CI.
