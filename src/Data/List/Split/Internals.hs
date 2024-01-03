@@ -379,6 +379,19 @@ dropFinalBlank s = s {finalBlankPolicy = DropBlank}
 dropInnerBlanks :: Splitter a -> Splitter a
 dropInnerBlanks s = s {condensePolicy = DropBlankFields}
 
+-- | Split over a different type of element by performing a preprocessing step.
+--
+-- >>> split (mapSplitter snd $ oneOf "-_") $ zip [0..] "a-bc_d"
+-- [[(0,'a')],[(1,'-')],[(2,'b'),(3,'c')],[(4,'_')],[(5,'d')]]
+--
+-- >>> split (mapSplitter toLower $ dropDelims $ whenElt (== 'x')) "abXcxd"
+-- ["ab","c","d"]
+mapSplitter :: (b -> a) -> Splitter a -> Splitter b
+mapSplitter f (Splitter d dp cp ibp fbp) = Splitter (mapDelimiter f d) dp cp ibp fbp
+ where
+  mapDelimiter :: (b -> a) -> Delimiter a -> Delimiter b
+  mapDelimiter g (Delimiter xs) = Delimiter $ map (. g) xs
+
 -- ** Derived combinators
 
 -- | Drop all blank chunks from the output, and condense consecutive
