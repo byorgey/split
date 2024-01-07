@@ -384,6 +384,7 @@ dropInnerBlanks s = s {condensePolicy = DropBlankFields}
 -- >>> split (mapSplitter snd $ oneOf "-_") $ zip [0..] "a-bc_d"
 -- [[(0,'a')],[(1,'-')],[(2,'b'),(3,'c')],[(4,'_')],[(5,'d')]]
 --
+-- >>> import Data.Char (toLower)
 -- >>> split (mapSplitter toLower $ dropDelims $ whenElt (== 'x')) "abXcxd"
 -- ["ab","c","d"]
 mapSplitter :: (b -> a) -> Splitter a -> Splitter b
