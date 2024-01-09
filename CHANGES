@@ -1,3 +1,11 @@
+* 0.2.5 (9 January 2024)
+
+  - Test with GHC 9.8.
+  - New function `mapSplitter` witnessing the fact that `Splitter` is
+    a contravariant functor
+    ([#22](https://github.com/byorgey/split/pull/22), thanks to Ellis
+    Kesterton)
+
 * 0.2.4 (9 October 2023)
 
   - Test with GHC 9.6.
