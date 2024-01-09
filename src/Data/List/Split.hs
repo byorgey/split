@@ -61,6 +61,7 @@ module Data.List.Split (
   dropInitBlank,
   dropFinalBlank,
   dropInnerBlanks,
+  mapSplitter,
 
   -- ** Derived combinators
   -- $derived
