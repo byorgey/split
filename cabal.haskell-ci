@@ -7,7 +7,7 @@ docspec: True
 -- Build haddocks. Accepts booleans or version range.
 haddock: True
 
--- Run HLint
-hlint: True
-hlint-job: 9.4.5
-hlint-download-binary: True
+-- -- Run HLint
+-- hlint: True
+-- hlint-job: 9.4.5
+-- hlint-download-binary: True
